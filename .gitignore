@@ -37,3 +37,8 @@ all_tnn/analysis/util/__pycache__/*
 all_tnn/analysis/util/__pycache__/
 all_tnn/analysis/__pycache__/*
 all_tnn/analysis/__pycache__/
+
+data/
+docs/
+results/
+tests/
