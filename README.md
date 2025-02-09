@@ -34,9 +34,10 @@ This repository, available at [KietzmannLab/All-TNN](https://github.com/Kietzman
    ```bash
    git clone https://github.com/KietzmannLab/All-TNN.git
    ```
-2. Navigate to the repository directory:
+2. Navigate to the repository directory and pip All-TNN as a package:
    ```bash
    cd All-TNN
+   pip install -e .
    ```
 3. Create and activate your environment
    ```bash
@@ -51,10 +52,10 @@ This repository, available at [KietzmannLab/All-TNN](https://github.com/Kietzman
 ---
 ### Analyzing Models
 
-To generate results for multiple models, adjust the `config.py` in the folder `analysis`. Here you can select models and model seeds to analyze, as well as which analyses to perform. 
+To generate results for multiple models, adjust the `config.py` in the folder `all_tnn/analysis`. Here you can select models and model seeds to analyze, as well as which analyses to perform. 
 
 ```shell
-python analysis.py 
+python scripts/analysis.py 
 ```
 
 **Note:** computing several of these analyses can be very time-consuming, in particular retrieving model activations on test datasets. The results of all analyses can be downloaded pre-computed at the `save_dir` in the [OSF repository](https://osf.io/6m3g4/?view_only=2950b15542c84d7ca53a7312238a2980)
@@ -62,7 +63,7 @@ Memory requirements: <300GB. For calculating the energy consumption of a model o
 
 ### Loading and Testing Models
 
-To test a pretrained model on new stimuli, run `test_model.py`. 
+To test a pretrained model on new stimuli, run `scripts/model_test.py`. 
 Specify the model name and epoch and preprocess stimuli from your dataset of choice. 
 
 ---
