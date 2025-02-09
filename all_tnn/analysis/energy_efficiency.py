@@ -256,7 +256,6 @@ def analyze_activation_transmission_efficiency(
     os.makedirs(analysis_dir_path, exist_ok=True)
 
     # Stack multi-layer maps (except the very last if single receptive field)
-    # stacked_mean_energy_map = stack_energy_maps(mean_energy_consumption_map_across_layers[:-1])
     stacked_total_energy_map = stack_energy_maps(total_energy_consumption_map_across_layers[:-1])
 
     # print(f'mean of stacked_mean_energy_map: {np.mean(stacked_mean_energy_map)}')
@@ -266,11 +265,6 @@ def analyze_activation_transmission_efficiency(
     energy_map_folder = os.path.join(analysis_dir_path, 'energy_maps')
     os.makedirs(energy_map_folder, exist_ok=True)
 
-    # mean_map_fname = (
-    #     f"ali_5layers_NORM_LAYER_OUT_{NORM_LAYER_OUT}_"
-    #     f"NORM_PREV_LAYER_{NORM_PREV_LAYER}_{model_name}_alpha{hparams['alpha']}"
-    #     f"_drop{hparams['dropout_rate']}_pre_relu_{PRE_RELU}_stacked_mean_energy_map.npy"
-    # )
     total_map_fname = (
         f"ali_5layers_NORM_LAYER_OUT_{NORM_LAYER_OUT}_"
         f"NORM_PREV_LAYER_{NORM_PREV_LAYER}_{model_name}_alpha{hparams['alpha']}"
@@ -278,30 +272,6 @@ def analyze_activation_transmission_efficiency(
     )
     # np.save(os.path.join(energy_map_folder, mean_map_fname), stacked_mean_energy_map)
     np.save(os.path.join(energy_map_folder, total_map_fname), stacked_total_energy_map)
-
-    # Plot stacked energy maps
-    # fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-    # im0 = axs[0].imshow(stacked_mean_energy_map, cmap='viridis', vmin=0, 
-    #                     vmax=0.3 * np.max(stacked_mean_energy_map))
-    # axs[0].set_title('Stacked Mean Energy Map')
-    # axs[0].set_axis_off()
-    # plt.colorbar(im0, ax=axs[0], orientation='vertical')
-
-    # im1 = axs[1].imshow(stacked_total_energy_map, cmap='viridis', vmin=0, 
-    #                     vmax=0.3 * np.max(stacked_total_energy_map))
-    # axs[1].set_title('Stacked Total Energy Map')
-    # axs[1].set_axis_off()
-    # plt.colorbar(im1, ax=axs[1], orientation='vertical')
-
-    # energy_map_plot_fname_pdf = (
-    #     f"ali_5layers_NORM_LAYER_OUT_{NORM_LAYER_OUT}_"
-    #     f"NORM_PREV_LAYER_{NORM_PREV_LAYER}_{model_name}_alpha{hparams['alpha']}_"
-    #     f"drop{hparams['dropout_rate']}_pre_relu_{PRE_RELU}_stacked_energy_map.pdf"
-    # )
-    # energy_map_plot_fname_png = energy_map_plot_fname_pdf.replace('.pdf', '.png')
-    # plt.savefig(os.path.join(energy_map_folder, energy_map_plot_fname_pdf), dpi=450)
-    # plt.savefig(os.path.join(energy_map_folder, energy_map_plot_fname_png), dpi=450)
-    # plt.close()
 
     # Plot per-layer mean energy consumption maps + radial distribution
     layer_maps_dir = os.path.join(analysis_dir_path, 'energy_maps_and_trend_from_center')
@@ -325,125 +295,6 @@ def analyze_activation_transmission_efficiency(
             f"NORM_PREV_LAYER_{NORM_PREV_LAYER}.npy"
         )
         np.save(os.path.join(analysis_dir_path, map_save_name), mean_energy_map)
-
-    #     plt.colorbar(im_m, ax=axs[0], orientation='vertical')
-    #     center_pt = (
-    #         mean_energy_map.shape[0] // 2,
-    #         mean_energy_map.shape[1] // 2
-    #     )
-    #     max_rad = min(center_pt)
-    #     radial_en = calculate_radial_energy(mean_energy_map, center_pt, max_rad)
-
-    #     axs[1].plot(range(max_rad), radial_en, c='blue')
-    #     axs[1].set_title(f'Energy Drop from Center to Border for Layer {layer_i + 1}')
-    #     axs[1].set_xlabel('Distance from Center')
-    #     axs[1].set_ylabel('Average Energy')
-    #     axs[1].grid(True)
-    #     fig.tight_layout(pad=3.0)
-
-    #     plot_save_base = (
-    #         f"ylimted_combined_energy_layer{layer_i + 1}_NORM_LAYER_OUT_{NORM_LAYER_OUT}_"
-    #         f"NORM_PREV_LAYER_{NORM_PREV_LAYER}"
-    #     )
-    #     plt.savefig(os.path.join(layer_maps_dir, plot_save_base + ".png"), dpi=450)
-    #     plt.savefig(os.path.join(layer_maps_dir, plot_save_base + ".pdf"), dpi=450)
-        # plt.close()
-
-    # Plot per-layer total energy consumption maps + radial distribution
-    # We stored them in total_energy_consumption_map_across_layers, but 
-    # note that the function returns sum-based arrays, not the maps. 
-    # So we proceed similarly:
-    # for layer_i, total_map in tqdm(
-    #     enumerate(total_energy_consumption_map_across_layers),
-    #     desc='Plotting energy maps and radial energy distribution'
-    # ):
-    #     fig, axs = plt.subplots(2, 1, figsize=(10, 12))
-    #     im_t = axs[0].imshow(
-    #         total_map, cmap='viridis', 
-    #         vmin=0, vmax=0.3 * np.max(total_map)
-    #     )
-    #     axs[0].set_title(f'Total Energy Map for Layer {layer_i + 1}')
-    #     axs[0].set_axis_off()
-
-    #     total_map_save_name = (
-    #         f"ali_way_total_energy_map_layer{layer_i + 1}_NORM_LAYER_OUT_{NORM_LAYER_OUT}_"
-    #         f"NORM_PREV_LAYER_{NORM_PREV_LAYER}.npy"
-    #     )
-    #     np.save(os.path.join(analysis_dir_path, total_map_save_name), total_map)
-
-    #     plt.colorbar(im_t, ax=axs[0], orientation='vertical')
-    #     c_pt = (total_map.shape[0] // 2, total_map.shape[1] // 2)
-    #     max_rd = min(c_pt)
-    #     rad_energy = calculate_radial_energy(total_map, c_pt, max_rd)
-    #     axs[1].plot(range(max_rd), rad_energy, c='blue')
-    #     axs[1].set_title(f'Total Energy Drop from Center to Border for Layer {layer_i + 1}')
-    #     axs[1].set_xlabel('Distance from Center')
-    #     axs[1].set_ylabel('Average Energy')
-    #     axs[1].grid(True)
-
-    #     fig.tight_layout(pad=3.0)
-    #     plot_save_base_2 = (
-    #         f"ylimted_combined_total_energy_layer{layer_i + 1}_"
-    #         f"NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}"
-    #     )
-    #     plt.savefig(os.path.join(layer_maps_dir, plot_save_base_2 + ".png"), dpi=450)
-    #     plt.savefig(os.path.join(layer_maps_dir, plot_save_base_2 + ".pdf"), dpi=450)
-    #     plt.close()
-
-    # Plot (and save) the sum or individual unit energy consumption across layers
-    # energy_consumption_cal_types = ['sum', 'average_individual'][:]  
-    # # ^ The code references only the first index in the original snippet 
-    # #   (some partial logic?). Keeping it as-is to not change behavior.
-
-    # for i, consumption_list in enumerate([
-    #     sum_mean_energy_consumption_across_layers,
-    #     average_individual_energy_consumption_across_layers
-    # ]):
-    #     # Original code references only `:1` from the list but also enumerates 
-    #     # over them. This is somewhat contradictory but preserved as is.
-    #     energy_consumption_cal_type = energy_consumption_cal_types[i]
-    #     layer_cols = [f'Layer {idx+1}' for idx in range(len(consumption_list))]
-    #     model_df = pd.DataFrame(consumption_list).T
-    #     model_df.columns = layer_cols
-    #     model_df['Model'] = model_name
-
-    #     plt.figure(figsize=(10, 6))
-    #     sns.lineplot(data=model_df, marker='o')
-    #     plt.title('Layer-wise Mean L1 Norms with 95% Confidence Intervals')
-    #     plt.xlabel('Layer')
-    #     plt.ylabel('Mean L1 Norm')
-    #     plt.xticks(rotation=45)
-    #     plt.grid(True)
-
-    #     sub_dir = os.path.join(analysis_dir_path, energy_consumption_cal_type)
-    #     os.makedirs(sub_dir, exist_ok=True)
-
-    #     plot_fname_png = (
-    #         f"ali_{model_name}_alpha{hparams['alpha']}_drop{hparams['dropout_rate']}_"
-    #         f"pre_relu_{PRE_RELU}_{energy_consumption_cal_type}_l1_norms_error_bar_"
-    #         f"NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}.png"
-    #     )
-    #     plot_fname_pdf = plot_fname_png.replace('.png', '.pdf')
-    #     plt.savefig(os.path.join(sub_dir, plot_fname_png))
-    #     plt.savefig(os.path.join(sub_dir, plot_fname_pdf))
-    #     plt.close()
-
-    #     df = pd.DataFrame({
-    #         'Layer': list(range(1, 7)),
-    #         'Mean L1 Norm': (
-    #             consumption_list if len(consumption_list) == 6
-    #             else consumption_list[:-1]
-    #         ),
-    #     })
-    #     multi_models_neural_dict[f'{model_name}'][f'{energy_consumption_cal_type}_l1_norms'] = consumption_list
-
-    #     csv_file_path = os.path.join(
-    #         analysis_dir_path,
-    #         f"ali_{model_name}_alpha{hparams['alpha']}_drop{hparams['dropout_rate']}_"
-    #         f"pre_relu_{PRE_RELU}_{energy_consumption_cal_type}_"
-    #         f"l1_norms_NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}.csv"
-    #     )
-    #     df.to_csv(csv_file_path, index=False)
 
 
 def calculate_layer_energy_consumption(
@@ -578,50 +429,8 @@ def calculate_layer_energy_consumption(
     save_dir = os.path.join(hparams['analysis_dir'], 'energy_efficiency', f'ep{epoch}')
     os.makedirs(save_dir, exist_ok=True)
 
-    # np.save(
-    #     os.path.join(
-    #         save_dir,
-    #         f"ali_way_postsynaptic_energy_consumption_layer{layer_i+1}_"
-    #         f"NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}_mean.npy"
-    #     ),
-    #     mean_post
-    # )
-    # np.save(
-    #     os.path.join(
-    #         save_dir,
-    #         f"ali_way_presynaptic_energy_consumption_layer{layer_i+1}_"
-    #         f"NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}_mean.npy"
-    #     ),
-    #     mean_pre
-    # )
-    # np.save(
-    #     os.path.join(
-    #         save_dir,
-    #         f"ali_way_postsynaptic_energy_consumption_layer{layer_i+1}_"
-    #         f"NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}_sum.npy"
-    #     ),
-    #     sum_post
-    # )
-    # np.save(
-    #     os.path.join(
-    #         save_dir,
-    #         f"ali_way_presynaptic_energy_consumption_layer{layer_i+1}_"
-    #         f"NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}_sum.npy"
-    #     ),
-    #     sum_pre
-    # )
-
-    # overall_mean_energy = (1/3) * mean_post + (2/3) * mean_pre
+   
     overall_sum_energy = (1/3) * sum_post + (2/3) * sum_pre
-
-    # np.save(
-    #     os.path.join(
-    #         save_dir,
-    #         f"ali_way_overall_mean_energy_consumption_layer{layer_i+1}_"
-    #         f"NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}.npy"
-    #     ),
-    #     overall_mean_energy
-    # )
     np.save(
         os.path.join(
             save_dir,
@@ -631,8 +440,7 @@ def calculate_layer_energy_consumption(
         overall_sum_energy
     )
 
-    return overall_sum_energy # , None
-    # return overall_sum_energy, overall_mean_energy
+    return overall_sum_energy 
 
 
 def analyze_energy_efficiency(
@@ -703,225 +511,6 @@ def analyze_energy_efficiency(
         energy_maps.append(np.abs(e_map))
         window_sized_energy_maps.append(window_map)
 
-    # Optionally correlate with grating entropy
-    # if grating_w_entropies is not None:
-    #     for i in range(grating_w_entropies.shape[0]):
-    #         entropy_map = np.squeeze(
-    #             channels_to_sheet(np.expand_dims(grating_w_entropies[i][0], 0), return_np=True)
-    #         )
-    #         energy_map = energy_maps[i]  # or window_sized_energy_maps[i]
-    #         window_map = window_sized_energy_maps[i]
-
-    #         # Ridge regression
-    #         X = entropy_map.flatten().reshape(-1, 1)
-    #         y = energy_map.flatten()
-    #         ridge_model = Ridge(alpha=1.0)
-    #         ridge_model.fit(X, y)
-    #         y_pred = ridge_model.predict(X)
-
-    #         fig, ax = plt.subplots(3, 2, figsize=(10, 10))
-    #         im0 = ax[0, 0].imshow(entropy_map, cmap='viridis')
-    #         im0.set_clim(0, 2)
-    #         ax[0, 0].set_title(f'Entropy Map for Layer {i+1}')
-    #         ax[0, 0].set_xticks([])
-    #         ax[0, 0].set_yticks([])
-    #         plt.colorbar(im0, ax=ax[0, 0], orientation='horizontal')
-
-    #         im1 = ax[0, 1].imshow(energy_map, cmap='viridis')
-    #         ax[0, 1].set_title(f'Energy Map for Layer {i+1}')
-    #         im1.set_clim(0, l1_norms_indivduals[i] * 5)
-    #         ax[0, 1].set_xticks([])
-    #         ax[0, 1].set_yticks([])
-    #         plt.colorbar(im1, ax=ax[0, 1], orientation='horizontal')
-
-    #         # Save .npy
-    #         # save_path = os.path.join(
-    #         #     hparams['analysis_dir'],
-    #         #     'energy_efficiency',
-    #         #     f'ep{epoch}',
-    #         #     f"{model_name}_alpha{hparams['alpha']}_drop{hparams['dropout_rate']}_"
-    #         #     f"post_norm_{POST_NORM}_pre_relu_{PRE_RELU}_energy_map_layer{i+1}.npy"
-    #         # )
-    #         # os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    #         # np.save(save_path, energy_map)
-
-    #         # Radial entropy
-    #         center_point = (entropy_map.shape[0] // 2, entropy_map.shape[1] // 2)
-    #         max_radius = min(center_point)
-    #         radial_entropy_vals = []
-    #         for radius in range(max_radius):
-    #             mask = create_circular_mask(entropy_map.shape, center=center_point, radius=radius)
-    #             masked_ent = np.ma.masked_array(entropy_map, ~mask)
-    #             radial_entropy_vals.append(np.ma.mean(masked_ent))
-
-    #         ax[1, 0].plot(range(max_radius), radial_entropy_vals, c='green')
-    #         ax[1, 0].set_title(f'Entropy Drop from Center to Border for Layer {i+1}')
-    #         ax[1, 0].set_xlabel('Distance from Fovea')
-    #         ax[1, 0].set_ylabel('Average Entropy')
-
-    #         # Save the radial entropy
-    #         ent_csv_path = os.path.join(
-    #             hparams['analysis_dir'],
-    #             'energy_efficiency',
-    #             f'ep{epoch}',
-    #             f"{model_name}_alpha{hparams['alpha']}_drop{hparams['dropout_rate']}_"
-    #             f"pre_relu_{PRE_RELU}_entropy_drop_layer{i+1}.csv"
-    #         )
-    #         with open(ent_csv_path, mode='w', newline='') as csv_file:
-    #             writer = csv.DictWriter(csv_file, fieldnames=['Radius', 'Entropy'])
-    #             writer.writeheader()
-    #             for r_idx, r_val in enumerate(radial_entropy_vals):
-    #                 writer.writerow({'Radius': r_idx, 'Entropy': r_val})
-
-    #         # Radial energy
-    #         radial_energy_vals = []
-    #         for radius in range(max_radius):
-    #             mask = create_circular_mask(window_map.shape, center=center_point, radius=radius)
-    #             masked_eng = np.ma.masked_array(window_map, ~mask)
-    #             radial_energy_vals.append(np.ma.mean(masked_eng))
-
-    #         ax[1, 1].plot(range(max_radius), radial_energy_vals, c='blue')
-    #         ax[1, 1].set_title(f'Energy Drop from Center to Border for Layer {i+1}')
-    #         ax[1, 1].set_xlabel('Distance from Fovea')
-    #         ax[1, 1].set_ylabel('Average Energy')
-
-    #         eng_csv_path = os.path.join(
-    #             hparams['analysis_dir'],
-    #             'energy_efficiency',
-    #             f'ep{epoch}',
-    #             f"{model_name}_alpha{hparams['alpha']}_drop{hparams['dropout_rate']}_"
-    #             f"pre_relu_{PRE_RELU}_energy_drop_layer{i+1}.csv"
-    #         )
-    #         with open(eng_csv_path, mode='w', newline='') as csv_file:
-    #             writer = csv.DictWriter(csv_file, fieldnames=['Radius', 'Energy'])
-    #             writer.writeheader()
-    #             for r_idx, r_val in enumerate(radial_energy_vals):
-    #                 writer.writerow({'Radius': r_idx, 'Energy': r_val})
-
-    #         # Binning radii by 20 for medians
-    #         radii_bins = np.arange(0, max_radius, 20)
-    #         median_radial_entropy = []
-    #         median_radial_energy = []
-    #         for start_radius in radii_bins:
-    #             end_radius = start_radius + 20
-    #             med_ent = np.median(radial_entropy_vals[start_radius:end_radius])
-    #             med_eng = np.median(radial_energy_vals[start_radius:end_radius])
-    #             median_radial_entropy.append(med_ent)
-    #             median_radial_energy.append(med_eng)
-
-    #         ax[2, 0].plot(radii_bins, median_radial_entropy, c='green')
-    #         ax[2, 0].set_title(f'Median Entropy Drop for Layer {i+1}')
-    #         ax[2, 0].set_xlabel('Distance from Fovea')
-    #         ax[2, 0].set_ylabel('Median Entropy')
-
-    #         ax[2, 1].plot(radii_bins, median_radial_energy, c='blue')
-    #         ax[2, 1].set_title(f'Median Energy Drop for Layer {i+1}')
-    #         ax[2, 1].set_xlabel('Distance from Fovea')
-    #         ax[2, 1].set_ylabel('Median Energy')
-
-    #         # Save medians
-    #         ent_median_path = os.path.join(
-    #             hparams['analysis_dir'],
-    #             'energy_efficiency',
-    #             f'ep{epoch}',
-    #             f"median_entropy_drop_layer{i+1}.csv"
-    #         )
-    #         eng_median_path = os.path.join(
-    #             hparams['analysis_dir'],
-    #             'energy_efficiency',
-    #             f'ep{epoch}',
-    #             f"median_energy_drop_layer{i+1}.csv"
-    #         )
-    #         with open(ent_median_path, mode='w', newline='') as file_e:
-    #             writer_e = csv.writer(file_e)
-    #             writer_e.writerow(['Radius', 'Median Entropy'])
-    #             writer_e.writerows(zip(radii_bins, median_radial_entropy))
-    #         with open(eng_median_path, mode='w', newline='') as file_eng:
-    #             writer_eng = csv.writer(file_eng)
-    #             writer_eng.writerow(['Radius', 'Median Energy'])
-    #             writer_eng.writerows(zip(radii_bins, median_radial_energy))
-
-    #         # Save figure
-    #         fig_save_path_png = os.path.join(
-    #             hparams['analysis_dir'], 
-    #             'energy_efficiency', 
-    #             f'ep{epoch}',
-    #             f"{model_name}_alpha{hparams['alpha']}_drop{hparams['dropout_rate']}_"
-    #             f"pre_relu_{PRE_RELU}_energy_entropy_regression_layer{i+1}.png"
-    #         )
-    #         fig_save_path_pdf = fig_save_path_png.replace('.png', '.pdf')
-
-    #         plt.savefig(fig_save_path_png, dpi=450)
-    #         plt.savefig(fig_save_path_pdf, dpi=450)
-    #         plt.close()
-
-    # Prepare 4 sets of L1 norms for plotting
-    # l1_types = [
-    #     'average_stimuli_then_units', 
-    #     'average_units_then_stimuli', 
-    #     'indivdual', 
-    #     'total'
-    # ]
-    # norm_values_list = [
-    #     l1_norms_average_stimuli_then_units,
-    #     l1_norms_average_units_then_stimuli,
-    #     l1_norms_indivduals,
-    #     l1_norms_total
-    # ]
-
-    # for i, avg_l1_list in enumerate(norm_values_list):
-    #     l1_name = l1_types[i]
-    #     layer_cols = [f'Layer {k+1}' for k in range(len(avg_l1_list))]
-    #     model_df = pd.DataFrame(avg_l1_list).T
-    #     model_df.columns = layer_cols
-    #     model_df['Model'] = model_name
-    #     all_l1_norm_data.append(model_df)
-
-    #     combined_df = pd.concat(all_l1_norm_data, ignore_index=True)
-    #     long_df = combined_df.melt(id_vars='Model', var_name='Layer', value_name='L1_Norm')
-
-    #     plt.figure(figsize=(10, 6))
-    #     sns.lineplot(data=long_df, x='Layer', y='L1_Norm', hue='Model', ci=95, marker='o')
-    #     plt.title('Layer-wise Mean L1 Norms with 95% Confidence Intervals')
-    #     plt.xlabel('Layer')
-    #     plt.ylabel('Mean L1 Norm')
-    #     plt.xticks(rotation=45)
-    #     plt.grid(True)
-
-    #     os.makedirs(os.path.join(hparams['analysis_dir'], 'energy_efficiency', f'ep{epoch}'), exist_ok=True)
-
-    #     fig_file_base = (
-    #         f"{model_name}_alpha{hparams['alpha']}_drop{hparams['dropout_rate']}_"
-    #         f"pre_relu_{PRE_RELU}_{l1_name}_l1_norms_error_bar"
-    #     )
-
-    #     plt.savefig(
-    #         os.path.join(hparams['analysis_dir'], 'energy_efficiency', f'ep{epoch}', f"{fig_file_base}.png"), 
-    #         dpi=450
-    #     )
-    #     plt.savefig(
-    #         os.path.join(hparams['analysis_dir'], 'energy_efficiency', f'ep{epoch}', f"{fig_file_base}.pdf"), 
-    #         dpi=450
-    #     )
-    #     plt.close()
-
-    #     df_save = pd.DataFrame({
-    #         'Layer': list(range(1, 7)),
-    #         'Mean L1 Norm': (
-    #             avg_l1_list if len(avg_l1_list) == 6
-    #             else avg_l1_list[:-1]
-    #         ),
-    #     })
-    #     multi_models_neural_dict[f'{model_name}']['l1_norms'] = avg_l1_list
-
-    #     csv_file_path = os.path.join(
-    #         hparams['analysis_dir'], 
-    #         'energy_efficiency', 
-    #         f'ep{epoch}', 
-    #         f"{model_name}_alpha{hparams['alpha']}_drop{hparams['dropout_rate']}_"
-    #         f"pre_relu_{PRE_RELU}_{l1_name}_l1_norms.csv"
-    #     )
-    #     df_save.to_csv(csv_file_path, index=False)
 
 
 ## ----------------- Utils Functions----------------- ##
