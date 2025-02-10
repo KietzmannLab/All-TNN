@@ -42,3 +42,5 @@ data/
 docs/
 results/
 tests/
+save_dir/
+save_dir/*

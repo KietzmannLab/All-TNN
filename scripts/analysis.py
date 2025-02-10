@@ -13,7 +13,6 @@ from all_tnn.dataset_loader.make_tf_dataset import get_dataset
 from all_tnn.analysis.orientation_selectivity import orientation_selectivity
 from all_tnn.analysis.category_selectivity import compute_category_selectivities
 from all_tnn.analysis.energy_efficiency import (
-    plot_energy_efficiency,
     analyze_energy_efficiency,
     analyze_activation_transmission_efficiency,
     load_feature_responses,
@@ -142,10 +141,6 @@ def save_all_neural_level_analyses_results(
         )
 
     results_to_disk(directory, multi_models_neural_dict)
-
-    if ENERGY_EFFICIENCY:
-        plot_energy_efficiency(all_l1_norm_data, POST_NORM, PRE_RELU, f"{directory_path}/response_similarity_distance_and_energy/")
-
 
 def analysis_multi_models():
     """

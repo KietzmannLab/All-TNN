@@ -527,52 +527,6 @@ def create_circular_mask(h_w, center=None, radius=None):
     mask = dist_from_center <= radius
     return mask
 
-def plot_energy_efficiency(all_l1_norm_data, post_norm, pre_relu,  save_dir):
-    """
-    Plots and saves the mean L1 norms across layers for LCN and All-TNN.
-
-    Args:
-    - all_l1_norm_data (list): List of DataFrames, each corresponding to a different model.
-    - pre_relu (bool): Indicator whether pre ReLU is used.
-    - save_dir (str): Directory path where the plots and data will be saved.
-
-    # Example usage:
-    # plot_energy_efficiency(all_l1_norm_data, PRE_RELU, "./save_dir/.response_similarity_distance_and_energy/")
-    """
-
-    # Combine data from all models into a single DataFrame
-    combined_df = pd.concat(all_l1_norm_data, ignore_index=True)
-
-    # Save combined_df as a csv file
-    csv_file_path = os.path.join(save_dir, f"combined_post_norm_{post_norm}_pre_relu_{pre_relu}_df.csv")
-    os.makedirs(os.path.dirname(csv_file_path), exist_ok=True)
-    combined_df.to_csv(csv_file_path, index=False)
-
-    # Melt the combined DataFrame for Seaborn
-    long_df = combined_df.melt(id_vars='Model', var_name='Layer', value_name='L1_Norm')
-
-    # Plotting
-    plt.figure(figsize=(10, 6))
-    sns.lineplot(data=long_df, x='Layer', y='L1_Norm', hue='Model', errorbar=('ci', 95))
-
-    plt.title('Mean L1 Norms Across Layers for LCN and All-TNN')
-    plt.xlabel('Layer')
-    plt.ylabel('Mean L1 Norm')
-    plt.legend()
-    plt.grid(True)
-
-    # Define filenames for the plots
-    pdf_file = f"comparision_LCN_vs_TNN_l1_norms_error_bar_post_norm_{post_norm}_pre_relu_{pre_relu}.pdf"
-    png_file = f"comparision_LCN_vs_TNN_l1_norms_error_bar_post_norm_{post_norm}_pre_relu_{pre_relu}.png"
-    
-    # Save the plots
-    os.makedirs(os.path.join(save_dir, 'l1_norms'), exist_ok=True)
-    plt.savefig(os.path.join(save_dir,  'l1_norms', pdf_file), dpi=450)
-    plt.savefig(os.path.join(save_dir, 'l1_norms',  png_file), dpi=450)
-
-    plt.close()
-
-
 def plot_radial_energy_distribution(layer_i, energy_map, save_dir):
     center_point = (energy_map.shape[0] // 2, energy_map.shape[1] // 2)
     max_radius = min(center_point)
