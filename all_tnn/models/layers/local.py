@@ -2,7 +2,6 @@ import os
 import tensorflow as tf
 from tensorflow.python.keras import backend as k
 from tensorflow.keras import layers
-from task_helper_functions import localdir_modulespec
 from all_tnn.models.model_helper import model_helper_functions
 
 
