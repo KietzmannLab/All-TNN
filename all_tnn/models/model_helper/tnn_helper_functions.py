@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import backend as k
@@ -9,9 +10,8 @@ from tensorflow.python.eager import backprop
 from tensorflow.python.keras.engine import data_adapter
 from tensorflow.keras import layers, models, datasets
 
-import os
-from all_tnn.task_helper_functions import localdir_modulespec
-local_dir = os.path.dirname(os.path.realpath(__file__))
+from all_tnn.models.model_helper import tnn_helper_functions
+
 
 class SpatialLoss:
     def __init__(self, n_layers, alpha, loss_filtered_by_relu=False, using_goodness_gradient_bias=False, add_regularizer_loss=False):
@@ -25,7 +25,6 @@ class SpatialLoss:
         if goodness_of_gradients is None:
             goodness_of_gradients = [None] * len(w)
             
-        tnn_helper_functions = localdir_modulespec('tnn_helper_functions', local_dir)
         loss_terms = 0.0
 
         for i, (weight, bias, out_shape, k_size, layer_idx) in enumerate(zip(w, b, output_shape, kernel_size, range(len(w)))):

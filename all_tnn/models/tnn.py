@@ -1,15 +1,8 @@
 import os
 import sys 
 import tensorflow as tf
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__))+'/../')
-from task_helper_functions import localdir_modulespec
-
-local_dir = os.path.dirname(os.path.realpath(__file__))
-local_funcs = localdir_modulespec('local', local_dir+'/layers')
-help_funcs = localdir_modulespec('model_helper_functions', local_dir+'/model_helper')
-tnn_help_funcs = localdir_modulespec('tnn_helper_functions', local_dir+'/model_helper')
-tnn_spatial_loss_helper = localdir_modulespec('tnn_helper_functions', local_dir+'/model_helper')
+from all_tnn.models.model_helper import tnn_helper_functions
+from all_tnn.models.model_helper import model_helper_functions
 
 
 def tnn(input_tensor, n_classes, hparams, conv_control_net):
@@ -48,7 +41,7 @@ def tnn(input_tensor, n_classes, hparams, conv_control_net):
             print(f'Adding pooling after layer {l} (printed from tnn.py)')
             x = tf.keras.layers.MaxPool2D()(x)
         if hparams.get("learnable_dropout_mask", False):
-            steep_sigmoid_layer = tnn_spatial_loss_helper.SteepSigmoidMultiplierLayer(
+            steep_sigmoid_layer = tnn_helper_functions.SteepSigmoidMultiplierLayer(
                 input_shape=x.shape[1:], 
                 l1_regularization=hparams["dropout_l1_regularizer_value"], 
                 name=f'ssml_{l}'
@@ -60,7 +53,7 @@ def tnn(input_tensor, n_classes, hparams, conv_control_net):
     else:
         outputs = help_funcs.parse_readout(n_classes, hparams, x)
 
-    model = tnn_spatial_loss_helper.SpatialLossModel(
+    model = tnn_helper_functions.SpatialLossModel(
         inputs=input_tensor, 
         outputs=outputs, 
         hparams=hparams, 
