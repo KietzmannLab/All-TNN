@@ -4,7 +4,6 @@ from tensorflow.python.keras import backend as k
 from tensorflow.keras import layers
 from all_tnn.models.model_helper import model_helper_functions
 
-
 class Hypercolumn2D(tf.keras.layers.LocallyConnected2D):
     """This layer is almost identical to its superclass, LocallyConnected2D. Only the call and get_weights methods are
     extended in case this is enabled in the hyperparameters."""
