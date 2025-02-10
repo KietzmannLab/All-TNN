@@ -2,8 +2,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .annotation_help_funcs import COCO_ID_NAME_MAP, COCO_NAME_ID_MAP, BEHAVIOUR_CATEGORIES_ORDERED_COCO_ID, CATEGORY_NAMES
-from .behaviour_mat_data_func import  get_all_participants_results_to_acc_maps_dict
+from all_tnn.analysis.util.annotation_help_funcs import COCO_ID_NAME_MAP, COCO_NAME_ID_MAP, BEHAVIOUR_CATEGORIES_ORDERED_COCO_ID, CATEGORY_NAMES
+from all_tnn.analysis.util.behaviour_mat_data_func import  get_all_participants_results_to_acc_maps_dict
 
 def get_behaviour_data(
             model_names,

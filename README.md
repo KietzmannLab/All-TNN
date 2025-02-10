@@ -32,6 +32,7 @@ This repository, available at [KietzmannLab/All-TNN](https://github.com/Kietzman
 
 1. Clone the repository:
    ```bash
+   mkdir All-TNN
    git clone https://github.com/KietzmannLab/All-TNN.git
    ```
 2. Navigate to the repository directory and pip install All-TNN as a package:

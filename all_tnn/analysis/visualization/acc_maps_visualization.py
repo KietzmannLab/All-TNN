@@ -9,7 +9,7 @@ from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib as mpl
 
 # Setting color style
-from .colors import COLOR_THEME, COLOR_THEME_WITH_ALPHA_SWEEP
+from all_tnn.analysis.visualization.colors import COLOR_THEME, COLOR_THEME_WITH_ALPHA_SWEEP
 import scienceplots
 plt.style.use([ 'nature','science',"ieee",'no-latex'])
 
