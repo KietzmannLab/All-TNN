@@ -65,7 +65,6 @@ def get_losses_and_metrics(network_output_layers, spatial_loss_values, hparams):
         import keras_cv
         print('Using a self-supervised simCLR model.')
         from models.model_helper.simclr_helper_functions import SimCLRLossMetric, SimCLRSpatialLossMetric, CombinedSimCLRSpatialLoss
-
         if hparams['simclr_temperature'] == 'none':
             raise ValueError('You are using a simCLR model but have not specified a temperature in hparams["simclr_temperature"].')
 

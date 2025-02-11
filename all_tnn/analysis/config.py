@@ -22,30 +22,30 @@ EARLY_STOPPING_FLAG = [False, True][1]  # Whether to use early stopping
 # -------------------------------------------------------------------
 # ---------------  Range of seeds and model definitions  -------------
 # -------------------------------------------------------------------
-SEEDS_RANGE = [1, 2, 3, 4, 5][:1]
+SEEDS_RANGE = [1, 2, 3, 4, 5][:]
 
 MODEL_NAMES = [
 
-    "CNN_lr_0.05",
-    "LCN_lr_0.05",
-    "TNN_alpha_1_lr_0.05",
-    "TNN_alpha_10_lr_0.05",
-    "TNN_alpha_100_lr_0.05",
+    "CNN",
+    "LCN",
+    "TNN_alpha_1",
+    "TNN_alpha_10",
+    "TNN_alpha_100",
 
     "TNN_simclr_finetune",
-    "shifted_TNN_alpha_10_lr_0.05"
+    "shifted_TNN_alpha_10"
 ]
 
 MODELS_EPOCHS_DICT = {
     
-    "CNN_lr_0.05": [35] * 5,
-    "LCN_lr_0.05": [35] * 5,
-    "TNN_alpha_1_lr_0.05": [35] * 5,
-    "TNN_alpha_10_lr_0.05": [300, 270, 260, 300, 230],
-    "TNN_alpha_100_lr_0.05": [600] * 5,
+    "CNN": [35] * 5,
+    "LCN": [35] * 5,
+    "TNN_alpha_1": [35] * 5,
+    "TNN_alpha_10": [300, 270, 260, 300, 230],
+    "TNN_alpha_100": [600] * 5,
     
     "TNN_simclr_finetune": [600] * 5,  
-    "shifted_TNN_alpha_10_lr_0.05": [300] * 5,
+    "shifted_TNN_alpha_10": [300] * 5,
 }
 
 
@@ -53,13 +53,13 @@ MODELS_EPOCHS_DICT = {
 MODEL_NAME_PATH_DICT = {
     'Human': None,
     'TNN_simclr_finetune': 'finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks', 
-    'shifted_TNN_alpha_10_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks',
+    'shifted_TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks',
 
-    'CNN_lr_0.05': 'tnn_conv_control_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_chunked',
-    'LCN_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
-    'TNN_alpha_1_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha1.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
-    'TNN_alpha_10_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
-    'TNN_alpha_100_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha100.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
+    'CNN': 'tnn_conv_control_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_chunked',
+    'LCN': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
+    'TNN_alpha_1': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha1.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
+    'TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
+    'TNN_alpha_100': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha100.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
 
 
 }
@@ -72,26 +72,26 @@ MODEL_NAME_PATH_DICT = {
 }
 
 ALPHAS = {
-    "CNN_lr_0.05": 0.0,
-    "LCN_lr_0.05": 0.0,
-    "TNN_alpha_1_lr_0.05": 1.0,
-    "TNN_alpha_10_lr_0.05": 10.0,
-    "TNN_alpha_100_lr_0.05": 100.0,
-    "shifted_TNN_alpha_10_lr_0.05": 10.0,
-    "8_neighbours_TNN_alpha_10_lr_0.05": 10.0,
+    "CNN": 0.0,
+    "LCN": 0.0,
+    "TNN_alpha_1": 1.0,
+    "TNN_alpha_10": 10.0,
+    "TNN_alpha_100": 100.0,
+    "shifted_TNN_alpha_10": 10.0,
+    "8_neighbours_TNN_alpha_10": 10.0,
     "TNN_simclr": 10.0,
     "TNN_simclr_finetune": 10.0,
 }
 
 MODEL_NAMES_TO_PLOT = {
-    'CNN_lr_0.05': 'CNN',
-    'LCN_lr_0.05': 'LCN',
-    'TNN_alpha_1_lr_0.05': 'All-TNN\n($\\alpha=1$)',
-    'TNN_alpha_10_lr_0.05': 'All-TNN\n($\\alpha=10$)',
-    'TNN_alpha_100_lr_0.05': 'All-TNN\n($\\alpha=100$)',
+    'CNN': 'CNN',
+    'LCN': 'LCN',
+    'TNN_alpha_1': 'All-TNN\n($\\alpha=1$)',
+    'TNN_alpha_10': 'All-TNN\n($\\alpha=10$)',
+    'TNN_alpha_100': 'All-TNN\n($\\alpha=100$)',
     'TNN_simclr_finetune': 'All-TNN\nSimCLR\n($\\alpha=10$)',
-    'shifted_TNN_alpha_10_lr_0.05': 'Shifted All-TNN\n($\\alpha=10$)',
-    '8_neighbours_TNN_alpha_10_lr_0.05': '8-Neighbours All-TNN\n($\\alpha=10$)',
+    'shifted_TNN_alpha_10': 'Shifted All-TNN\n($\\alpha=10$)',
+    '8_neighbours_TNN_alpha_10': '8-Neighbours All-TNN\n($\\alpha=10$)',
     "TDANN_imagenet_supervised": 'TDANN\nSupervised',
     "TDANN_imagenet_self_supervised": 'TDANN\nSelf-Supervised',
     'TDANN\nSupervised': 'TDANN\nSupervised',

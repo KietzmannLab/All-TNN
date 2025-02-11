@@ -7,6 +7,35 @@ import json
 import numpy as np
 from collections import defaultdict  # Used by nested_dict()
 
+def h52dict(h5_obj):
+    """
+    Recursively converts an h5py File or Group into a nested Python dictionary.
+    
+    Parameters:
+        h5_obj (h5py.File or h5py.Group): The HDF5 object to convert.
+        
+    Returns:
+        dict: A dictionary representation of the HDF5 object.
+    """
+    result = {}
+    for key, item in h5_obj.items():
+        # remove 'lr_0.05' from the key
+        key = key.replace('_lr_0.05', '')
+        # If the item is a dataset, retrieve its data (use item[()] to load all data).
+        if isinstance(item, h5py.Dataset):
+            result[key] = item[()]
+        # If the item is a group, recursively convert it to a dictionary.
+        elif isinstance(item, h5py.Group):
+            result[key] = h52dict(item)
+
+    return result
+
+def read_h52dict(h5_file_path):
+    """
+    Read an HDF5 file and convert it to a nested dictionary.
+    """
+    h5_file = h5py.File(h5_file_path, 'r')
+    return h52dict(h5_file)
 
 def save_dict_to_h5(h5_group, dictionary):
     """

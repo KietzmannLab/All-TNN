@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from collections import defaultdict
+from all_tnn.analysis.util.convert_dict2h5 import read_h52dict
 
 def generate_analysis_df(
     base_src_dir_path,
@@ -10,11 +11,11 @@ def generate_analysis_df(
     seeds_range,
     models_epochs_dict,
     MODEL_NAMES_TO_PLOT,
-    results_file_name='acc_smoothness_loss.pickle',
+    model_results_dict_filename = 'multi_models_neural_dict.h5',
 ):
     """
     Generate a pandas DataFrame containing model accuracies, losses, top-k accuracies,
-    spatial smoothness, and categorical losses from pickled data files.
+    spatial smoothness, and categorical losses from pickled/h5 data files.
 
     Parameters
     ----------
@@ -29,8 +30,8 @@ def generate_analysis_df(
         indexed by (seed-1).
     MODEL_NAMES_TO_PLOT : dict
         A dictionary mapping each model_name to a label (string) to be used in the DataFrame.
-    results_file_name : str
-        The name of the results file to load from the source directory.
+    results_dict : str
+        Results file in dict
 
     Returns
     -------
@@ -51,40 +52,25 @@ def generate_analysis_df(
     model_acc_dict = defaultdict(list)
     model_test_topk_accuracy = defaultdict(list)
     model_test_loss_dict = defaultdict(list)
-    model_test_catergrization_loss_dict = defaultdict(list)
     model_mean_cosdist_dict = defaultdict(list)
 
     # Loop over each model and seed to collect data
     for model_name in MODEL_NAMES:
+        # model_name = model_name
         for seed in seeds_range:
             src_path = os.path.join(
                 base_src_dir_path,
-                f'{models_epochs_dict[model_name][seed-1]}/seed{seed}/{results_file_name}'
+                f'seed{seed}/{model_results_dict_filename}'
             )
+            model_results_dict = read_h52dict(src_path)
+            if 'TNN_simclr' == model_name:
+                model_name = 'TNN_simclr_finetune' #* only finetuned model is used for analysis
 
-
-            # Load data from pickle
-            with open(src_path, 'rb') as handle:
-                model_seeds_dict = pickle.load(handle)
-
-                if 'TNN_simclr' == model_name:
-                    model_name = 'TNN_simclr_finetune' #* only finetuned model is used for analysis
-                # print(f"key: model_seeds_dict.keys() = {model_seeds_dict.keys()}")
-                model_acc_dict[model_name].append(model_seeds_dict[model_name]['ecoset_test_accuracy'])
-                model_test_loss_dict[model_name].append(model_seeds_dict[model_name]['ecoset_test_loss'])
-                model_test_topk_accuracy[model_name].append(model_seeds_dict[model_name]['ecoset_test_topk_accuracy'])
-                model_mean_cosdist_dict[model_name].append(np.sum(model_seeds_dict[model_name]['mean_cosdist']))
-
-                # Categorical loss logic
-                if model_name not in ['CNN_lr_0.05', 'LCN_lr_0.05']:
-                    cat_loss = (
-                        model_seeds_dict[model_name]['ecoset_test_accuracy']
-                        - model_seeds_dict[model_name]['ecoset_test_loss']
-                    )
-                else:
-                    cat_loss = model_seeds_dict[model_name]['ecoset_test_accuracy']
-
-                model_test_catergrization_loss_dict[model_name].append(cat_loss)
+            # print(f"key: model_results_dict.keys() = {model_results_dict.keys()}")
+            model_acc_dict[model_name].append(model_results_dict[model_name]['ecoset_test_accuracy'])
+            model_test_loss_dict[model_name].append(model_results_dict[model_name]['ecoset_test_loss'])
+            model_test_topk_accuracy[model_name].append(model_results_dict[model_name]['ecoset_test_topk_accuracy'])
+            model_mean_cosdist_dict[model_name].append(np.sum(model_results_dict[model_name]['mean_cosdist']))
 
     # Create a list of rows for the final DataFrame
     data = []
@@ -96,7 +82,6 @@ def generate_analysis_df(
                 model_test_loss_dict[model_name][i],             # "ecoset Loss"
                 model_test_topk_accuracy[model_name][i],         # "ecoset Topk Accuracy"
                 1 / model_mean_cosdist_dict[model_name][i],      # "Spatial Smoothness" = inverse of mean_cosdist
-                model_test_catergrization_loss_dict[model_name][i]  # "ecoset Categorical Loss"
             ])
 
     # Build the DataFrame
@@ -108,7 +93,6 @@ def generate_analysis_df(
             "ecoset Loss",
             "ecoset Topk Accuracy",
             "Spatial Smoothness",
-            "ecoset Categorical Loss"
         ]
     )
 

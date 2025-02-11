@@ -94,9 +94,9 @@ def plot_bar_plot_from_df(df_accuracy_ratios, path, x="Model", y="Effect", hue=N
     
     with plt.style.context(['nature', 'science', "ieee", 'no-latex']):
         if hue:
-            ax = barplot(color3_start_id=color3_start_id, figsize=figsize, title=title, x=x, y=y, hue=hue, data=df_accuracy_ratios, edgecolor="black", linewidth=.8, capsize=.02, err_kws={'linewidth': 1.5}, hline=hline, significance_dict=significance_dict, log_scale=log_scale)
+            ax = barplot(color3_start_id=color3_start_id, figsize=figsize, title=title, x=x, y=y, hue=hue, data=df_accuracy_ratios, edgecolor="black", linewidth=.8,  hline=hline, significance_dict=significance_dict, log_scale=log_scale)
         else:
-            ax = barplot(color3_start_id=color3_start_id, figsize=figsize, title=title, x=x, y=y, data=df_accuracy_ratios, edgecolor="black", linewidth=.8, capsize=.02, err_kws={'linewidth': 1.5}, hline=hline, significance_dict=significance_dict, log_scale=log_scale)
+            ax = barplot(color3_start_id=color3_start_id, figsize=figsize, title=title, x=x, y=y, data=df_accuracy_ratios, edgecolor="black", linewidth=.8,  hline=hline, significance_dict=significance_dict, log_scale=log_scale)
         
         if path:
             dir_path = os.path.dirname(path)
