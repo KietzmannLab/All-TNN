@@ -35,19 +35,15 @@ This repository, available at [KietzmannLab/All-TNN](https://github.com/Kietzman
    mkdir All-TNN
    git clone https://github.com/KietzmannLab/All-TNN.git
    ```
-2. Navigate to the repository directory and pip install All-TNN as a package:
-   ```bash
-   cd All-TNN
-   pip install -e .
-   ```
-3. Create and activate your environment
+2. Create and activate your environment
    ```bash
    python3 venv -m all_tnn_env
    source all_tnn_env/bin/activate
    ```
-4. Install the required dependencies:
+3. Navigate to the repository directory and pip install All-TNN as a package:
    ```bash
-   pip install -r requirements.txt
+   cd All-TNN
+   pip install -e .
    ```
 
 ---
