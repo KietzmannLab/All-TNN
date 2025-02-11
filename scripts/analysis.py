@@ -25,6 +25,7 @@ from all_tnn.analysis.behaviour_alignment import visual_behaviour_alignment_anal
 from all_tnn.analysis.util.statistic_funcs import plot_significance_matrix
 from all_tnn.analysis.util.setup_model_and_data import load_models, DatasetLabelRenamer
 from all_tnn.analysis.util.analysis_help_funcs import load_and_override_hparams, results_to_disk
+from all_tnn.analysis.util.convert_dict2h5 import convert_dict2h5
 from all_tnn.analysis.visualization.acc_maps_visualization import plot_bar_plot_from_df
 
 
@@ -118,22 +119,9 @@ def save_all_neural_level_analyses_results(
     os.makedirs(directory_path, exist_ok=True)
 
     print(f"Saving neural level results to {directory_path}")
-    # as h5py 
+    # Save all results as h5py (recommand) or pickle
     try:
-        with h5py.File(os.path.join(directory_path, f'{save_name_preffix}multi_models_neural_dict.h5'), 'w') as hf:
-            for model_name in model_names:
-                for key, value in multi_models_neural_dict[model_name].items():
-                    if isinstance(value, dict):
-                        if isinstance(list(value.values())[0], dict):
-                            for k, v in value.items():
-                                for kk, vv in v.items():
-                                    hf.create_dataset(f'{model_name}/{key}/{k}/{kk}', data=vv)
-                        else:
-                            for k, v in value.items():
-                                hf.create_dataset(f'{model_name}/{key}/{k}', data=v)
-                    else:
-                        hf.create_dataset(f'{model_name}/{key}', data=value)
-    # as pickle
+        convert_dict2h5(dict_path, h5_file= f'{save_name_preffix}multi_models_neural_dict.h5')
     except:
         pickle.dump(
             multi_models_neural_dict,

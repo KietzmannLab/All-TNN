@@ -1,6 +1,7 @@
 import os
 import sys 
 import tensorflow as tf
+from all_tnn.models.layers import local as local_funcs
 from all_tnn.models.model_helper import tnn_helper_functions
 from all_tnn.models.model_helper import model_helper_functions
 
