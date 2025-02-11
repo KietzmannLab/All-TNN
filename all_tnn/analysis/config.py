@@ -25,6 +25,7 @@ EARLY_STOPPING_FLAG = [False, True][1]  # Whether to use early stopping
 SEEDS_RANGE = [1, 2, 3, 4, 5][:1]
 
 MODEL_NAMES = [
+
     "CNN_lr_0.05",
     "LCN_lr_0.05",
     "TNN_alpha_1_lr_0.05",
@@ -36,6 +37,7 @@ MODEL_NAMES = [
 ]
 
 MODELS_EPOCHS_DICT = {
+    
     "CNN_lr_0.05": [35] * 5,
     "LCN_lr_0.05": [35] * 5,
     "TNN_alpha_1_lr_0.05": [35] * 5,
@@ -50,6 +52,8 @@ MODELS_EPOCHS_DICT = {
 #* Should align with the model names in MODELS_EPOCHS_DICT
 MODEL_NAME_PATH_DICT = {
     'Human': None,
+    'TNN_simclr_finetune': 'finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks', 
+    'shifted_TNN_alpha_10_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks',
 
     'CNN_lr_0.05': 'tnn_conv_control_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_chunked',
     'LCN_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
@@ -57,8 +61,6 @@ MODEL_NAME_PATH_DICT = {
     'TNN_alpha_10_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
     'TNN_alpha_100_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha100.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
 
-    'TNN_simclr_finetune': 'finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks', 
-    'shifted_TNN_alpha_10_lr_0.05': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks',
 
 }
 

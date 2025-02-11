@@ -82,23 +82,10 @@ def get_losses_and_metrics(network_output_layers, spatial_loss_values, hparams):
     else:
         loss_dict, metric_dict = {}, {}
 
-        def rescaled_cosine_loss():
-            # Rescaled cosine loss for embeddings from range [-1, 1] to [0, 2]
-            def loss(y_true, y_pred):
-                return tf.keras.losses.cosine_similarity(y_true, y_pred) + 1
-            return loss
-
         for layer in network_output_layers:
-            if hparams['embedding_target']:
-                if hparams['embedding_loss'].lower() == 'cosine':
-                    loss_dict[layer] = rescaled_cosine_loss()
-                    metric_dict[layer] = [tf.keras.metrics.CosineSimilarity()]
-                elif hparams['embedding_loss'].lower() == 'mse':
-                    loss_dict[layer] = tf.keras.losses.MeanSquaredError()
-                    metric_dict[layer] = [tf.keras.metrics.MeanSquaredError()]
-            else:
-                loss_dict[layer] = tf.keras.losses.CategoricalCrossentropy()
-                metric_dict[layer] = [tf.keras.metrics.CategoricalAccuracy(), tf.keras.metrics.TopKCategoricalAccuracy()]
+
+            loss_dict[layer] = tf.keras.losses.CategoricalCrossentropy()
+            metric_dict[layer] = [tf.keras.metrics.CategoricalAccuracy(), tf.keras.metrics.TopKCategoricalAccuracy()]
 
             if 'tnn' in hparams['model_name']:
                 from models.model_helper.tnn_helper_functions import SpatialLossMetric

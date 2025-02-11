@@ -9,42 +9,25 @@ from tensorflow.keras import backend as k
 from tensorflow.python.eager import backprop
 from tensorflow.python.keras.engine import data_adapter
 from tensorflow.keras import layers, models, datasets
-
 from all_tnn.models.model_helper import tnn_helper_functions
 
-
 class SpatialLoss:
-    def __init__(self, n_layers, alpha, loss_filtered_by_relu=False, using_goodness_gradient_bias=False, add_regularizer_loss=False):
+    def __init__(self, n_layers, alpha, add_regularizer_loss=False):
         self.spatial_loss_values = [0] * n_layers
         self.alpha = alpha
-        self.loss_filtered_by_relu = loss_filtered_by_relu
-        self.using_goodness_gradient_bias = using_goodness_gradient_bias
         self.add_regularizer_loss = add_regularizer_loss
 
-    def __call__(self, w, b, output_shape, kernel_size, circular, layer_alpha_factors, goodness_of_gradients=None, using_eight_neighbourhood_flag=False, save_path=None):
-        if goodness_of_gradients is None:
-            goodness_of_gradients = [None] * len(w)
+    def __call__(self, w, b, output_shape, kernel_size, circular, layer_alpha_factors, using_eight_neighbourhood_flag=False, save_path=None):
             
         loss_terms = 0.0
 
         for i, (weight, bias, out_shape, k_size, layer_idx) in enumerate(zip(w, b, output_shape, kernel_size, range(len(w)))):
-            goodness_of_gradient = goodness_of_gradients[layer_idx]
             mean_cos_dist = tnn_helper_functions.compute_weights_cosine_distance(
                 weight, bias, k_size, circular, return_maps=False,
-                using_goodness_gradient_bias=self.using_goodness_gradient_bias,
-                layer_gs=goodness_of_gradient, eight_neighbourhood=using_eight_neighbourhood_flag, save_path=save_path
+                 eight_neighbourhood=using_eight_neighbourhood_flag, save_path=save_path
             )
 
-            if not self.loss_filtered_by_relu:
-                unweighted_loss = mean_cos_dist
-            elif self.loss_filtered_by_relu == 'filter_larger_than_threshold':
-                unweighted_loss = tf.nn.relu(mean_cos_dist)
-            elif self.loss_filtered_by_relu == 'filter_smaller_than_threshold':
-                unweighted_loss = tf.nn.relu(-mean_cos_dist)
-            else:
-                raise NotImplementedError(f'loss_filtered_by_relu={self.loss_filtered_by_relu} not implemented')
-
-            final_loss = tf.multiply(unweighted_loss, self.alpha * layer_alpha_factors[layer_idx], name=f'spatial_loss_layer{layer_idx}')
+            final_loss = tf.multiply(mean_cos_dist, self.alpha * layer_alpha_factors[layer_idx], name=f'spatial_loss_layer{layer_idx}')
             self.spatial_loss_values[layer_idx] = final_loss
             loss_terms = tf.add(loss_terms, final_loss, name='spatial_loss_sum')
 
@@ -60,22 +43,13 @@ class SpatialLossModel(tf.keras.Model):
         super().__init__(inputs=inputs, outputs=outputs, name=name)
         self.hparams = hparams
         beta_schedule = hparams.get('beta_schedule', 'constant')
-        
-        self.alpha_multiplier = tf.Variable(1 if beta_schedule == 'constant' else 0, dtype=tf.float32, trainable=False)
-        self.using_blurring_weight_learning = hparams['using_blurring_weight_learning']
-        self.using_goodness_gradient_bias = hparams.get('using_goodness_gradient_bias', False)
-        self.goodness_gradient_metric = hparams.get('goodness_gradient_metric', 'L2')
+
 
     def test_step(self, data):
         data = data_adapter.expand_1d(data)
         x, y, sample_weight = data_adapter.unpack_x_y_sample_weight(data)
 
         y_pred = self(x, training=False)
-        if self.using_blurring_weight_learning:
-            self.apply_gaussian_blur_to_weights(size=3, sigma=0.4)
-
-        if self.using_goodness_gradient_bias:
-            self._update_spatial_loss()
 
         self._update_loss_and_metrics(y, y_pred, sample_weight)
 
@@ -85,15 +59,9 @@ class SpatialLossModel(tf.keras.Model):
         data = data_adapter.expand_1d(data)
         x, y, sample_weight = data_adapter.unpack_x_y_sample_weight(data)
 
-        if self.using_blurring_weight_learning:
-            self.apply_gaussian_blur_to_weights(size=3, sigma=0.4)
-
         with backprop.GradientTape(persistent=True) as tape:
             y_pred = self(x, training=True)
             loss = self._compute_loss(y, y_pred, sample_weight)
-
-            if self.using_goodness_gradient_bias:
-                self._compute_goodness_of_gradients(tape, y, y_pred, sample_weight)
 
         self.optimizer.minimize(loss, self.trainable_variables, tape=tape)
         self.compiled_metrics.update_state(y, y_pred, sample_weight)
@@ -112,16 +80,13 @@ class SpatialLossModel(tf.keras.Model):
             'kernel_size': [l.kernel_size for l in loss_layers],
             'circular': self.hparams['circular'],
             'layer_alpha_factors': tf.constant(self.hparams['layer_alpha_factors']),
-            'goodness_of_gradients': [None] * 6,
-            'using_eight_neighbourhood_flag': self.hparams['using_eight_neighbourhood_flag'],
+            'using_eight_neighbourhood_flag': self.hparams.get('using_eight_neighbourhood_flag', False)
         }
 
         self.loss_obj = SpatialLoss(
             n_layers=len(loss_layers),
             alpha=tf.constant(self.hparams['alpha']),
-            loss_filtered_by_relu=self.hparams['loss_filtered_by_relu'],
-            using_goodness_gradient_bias=self.hparams['using_goodness_gradient_bias'],
-            add_regularizer_loss=self.hparams['add_regularizer_loss']
+            add_regularizer_loss=self.hparams.get('add_regularizer_loss', False),
         )
 
         if self.hparams['spatial_loss']:
@@ -137,26 +102,6 @@ class SpatialLossModel(tf.keras.Model):
                 for l in self.losses
             ]
         )
-
-    def _compute_goodness_of_gradients(self, tape, y, y_pred, sample_weight):
-        classification_loss = self.compiled_loss(y, y_pred, sample_weight)
-        gradients = tape.gradient(classification_loss, self.trainable_variables)
-
-        gradients_hypercolumns = [
-            g for g in gradients if ('Reshape' in g.name or ':2' in g.name) and len(g.shape) == 3
-        ]
-        gradients_hypercolumn_2d_sheets = [
-            tf.squeeze(channels_to_sheet(g)) for g in gradients_hypercolumns
-        ]
-
-        if self.goodness_gradient_metric == 'L2':
-            goodness_of_gradients = [tf.square(g) for g in gradients_hypercolumn_2d_sheets]
-        elif self.goodness_gradient_metric == 'L1':
-            goodness_of_gradients = [tf.abs(g) for g in gradients_hypercolumn_2d_sheets]
-        else:
-            raise NotImplementedError(f'goodness_gradient_metric={self.goodness_gradient_metric} not implemented')
-
-        self._update_spatial_loss(goodness_of_gradients)
 
     def _update_spatial_loss(self, goodness_of_gradients=None):
         spatial_loss_args = self.spatial_loss_args
@@ -185,24 +130,6 @@ class SpatialLossModel(tf.keras.Model):
 
         return metrics_output
 
-    def gaussian_blur_kernel(self, size=3, sigma=1.0):
-        ax = tf.range(-size // 2 + 1.0, size // 2 + 1.0)
-        xx, yy = tf.meshgrid(ax, ax)
-        kernel = tf.exp(-(xx**2 + yy**2) / (2.0 * sigma**2))
-        return kernel / tf.reduce_sum(kernel)
-
-    def apply_gaussian_blur_to_weights(self, size=3, sigma=1.0):
-        kernel = self.gaussian_blur_kernel(size=size, sigma=sigma)
-        for layer in self.layers:
-            if isinstance(layer, tf.keras.layers.Conv2D):
-                weights, biases = layer.get_weights()
-                blurred_weights = tf.nn.depthwise_conv2d(
-                    weights[:, :, :, tf.newaxis],
-                    kernel[:, :, tf.newaxis, tf.newaxis],
-                    strides=[1, 1, 1, 1],
-                    padding="SAME"
-                )
-                layer.set_weights([blurred_weights[:, :, 0, :], biases])
 
 ##########################################################################################
 # Metrics for spatial regularization loss
@@ -252,7 +179,7 @@ class SpatialLossMetric(tf.keras.metrics.Metric):
 # Helper functions for spatial model & spatial regularization loss
 ##########################################################################################
 
-def compute_weights_cosine_distance(x, b, kernel_size, circular, return_maps=False, using_goodness_gradient_bias=False, layer_gs=None, eight_neighbourhood=False, save_path=None):
+def compute_weights_cosine_distance(x, b, kernel_size, circular, return_maps=False, eight_neighbourhood=False, save_path=None):
     """
     Returns the mean cosine distance between neighbouring neurons on a 2D sheet.
 
@@ -262,8 +189,6 @@ def compute_weights_cosine_distance(x, b, kernel_size, circular, return_maps=Fal
         kernel_size: Kernel size of the locally connected layer.
         circular: If True, applies circular boundary conditions.
         return_maps: If True, returns the similarity maps.
-        using_goodness_gradient_bias: If True, uses goodness of gradients for biasing.
-        layer_gs: Goodness of gradients.
         eight_neighbourhood: If True, considers 8 neighbours instead of 2.
         save_path: Path to save the similarity maps.
 
@@ -309,9 +234,6 @@ def compute_weights_cosine_distance(x, b, kernel_size, circular, return_maps=Fal
         mean_cos_sim = _compute_eight_neighbourhood_sim(x, circular, save_path)
 
     mean_cos_dist = (1 - mean_cos_sim) / 2
-
-    if using_goodness_gradient_bias and layer_gs is not None:
-        mean_cos_dist = _apply_goodness_gradient_bias(mean_cos_dist, layer_gs, bottom_sim, right_sim)
 
     if return_maps:
         return mean_cos_dist, bottom_sim, right_sim
@@ -361,21 +283,6 @@ def _compute_eight_neighbourhood_sim(x, circular, save_path):
 
     return mean_cos_sim
 
-def _apply_goodness_gradient_bias(mean_cos_dist, layer_gs, bottom_sim, right_sim):
-    """
-    Applies goodness gradient bias to the cosine distances.
-    """
-    highest_goodness = tf.reduce_max(layer_gs)
-
-    bottom_coefficient = (1 - layer_gs / highest_goodness + 1 - k.concatenate([layer_gs[1:, :], layer_gs[:1, :]], 0) / highest_goodness) / 2
-    right_coefficient = (1 - layer_gs / highest_goodness + 1 - k.concatenate([layer_gs[:, 1:], layer_gs[:, :1]], 1) / highest_goodness) / 2
-
-    right_goodness_weighted_sim = right_sim * right_coefficient
-    bottom_goodness_weighted_sim = bottom_sim * bottom_coefficient
-
-    mean_goodness_cos_sim = (k.mean(right_goodness_weighted_sim) + k.mean(bottom_goodness_weighted_sim)) / 2
-    mean_goodness_cos_dist = (1 - mean_goodness_cos_sim) / 2
-    return mean_goodness_cos_dist
     
     
 def extract_channel_dim(out_channels):
