@@ -23,48 +23,31 @@ EARLY_STOPPING_FLAG = [False, True][1]  # Whether to use early stopping
 # -------------------------------------------------------------------
 # ---------------  Range of seeds and model definitions  -------------
 # -------------------------------------------------------------------
-SEEDS_RANGE = [1, 2, 3, 4, 5][1:]
+SEEDS_RANGE = [1, 2, 3, 4, 5][:]
 
-MODEL_NAMES = [
-
-    "CNN",
-    "LCN",
-    "TNN_alpha_1",
-    "TNN_alpha_10",
-    "TNN_alpha_100",
-
-    "TNN_simclr_finetune",
-    "shifted_TNN_alpha_10"
-]
-
-MODELS_EPOCHS_DICT = {
-    
-    "CNN": [35] * 5,
-    "LCN": [35] * 5,
-    "TNN_alpha_1": [35] * 5,
-    "TNN_alpha_10": [300, 270, 260, 300, 230],
-    "TNN_alpha_100": [600] * 5,
-    
-    "TNN_simclr_finetune": [600] * 5,  
-    "shifted_TNN_alpha_10": [300] * 5,
-}
-
-
-#* Should align with the model names in MODELS_EPOCHS_DICT
+#* Model names and their corresponding paths
 MODEL_NAME_PATH_DICT = {
     'Human': None,
 
-    'shifted_TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks',
-    'TNN_simclr_finetune': 'finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks', 
-    
     'CNN': 'tnn_conv_control_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_chunked',
     'LCN': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
     'TNN_alpha_1': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha1.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
     'TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
     'TNN_alpha_100': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha100.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
-
+    
+    'shifted_TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks',
+    'TNN_simclr_finetune': 'finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks', 
 }
-
+MAIN_MODEL_NAMES = list(MODEL_NAME_PATH_DICT.keys())
+MODELS_EPOCHS_DICT = {
+    "CNN": [35] * 5,
+    "LCN": [35] * 5,
+    "TNN_alpha_1": [35] * 5,
+    "TNN_alpha_10": [300, 270, 260, 300, 230],
+    "TNN_alpha_100": [600] * 5,
+    "TNN_simclr_finetune": [600] * 5,  
+    "shifted_TNN_alpha_10": [300] * 5,
+}
 # Prepend BASE_MODEL_DIR to every path in MODEL_NAME_PATH_DICT (when not None)
 MODEL_NAME_PATH_DICT = {
     model: os.path.join(BASE_MODEL_DIR, subdir)
@@ -79,7 +62,6 @@ ALPHAS = {
     "TNN_alpha_10": 10.0,
     "TNN_alpha_100": 100.0,
     "shifted_TNN_alpha_10": 10.0,
-    "8_neighbours_TNN_alpha_10": 10.0,
     "TNN_simclr": 10.0,
     "TNN_simclr_finetune": 10.0,
 }
@@ -92,11 +74,6 @@ MODEL_NAMES_TO_PLOT = {
     'TNN_alpha_100': 'All-TNN\n($\\alpha=100$)',
     'TNN_simclr_finetune': 'All-TNN\nSimCLR\n($\\alpha=10$)',
     'shifted_TNN_alpha_10': 'Shifted All-TNN\n($\\alpha=10$)',
-    '8_neighbours_TNN_alpha_10': '8-Neighbours All-TNN\n($\\alpha=10$)',
-    "TDANN_imagenet_supervised": 'TDANN\nSupervised',
-    "TDANN_imagenet_self_supervised": 'TDANN\nSelf-Supervised',
-    'TDANN\nSupervised': 'TDANN\nSupervised',
-    'TDANN\nSelf-Supervised': 'TDANN\nSelf-Supervised',
 }
 
 # -------------------------------------------------------------------
@@ -167,7 +144,7 @@ ADM_METRIC = "pearsonr"
 RSA_METRIC = "spearmanr"
 
 # -------------------------------------------------------------------
-# ---------------  Saving directories and filenames for behaviour  ----------------
+# -----  Saving directories and filenames for behaviour  -----------
 # -------------------------------------------------------------------
 BEHAVIOUR_ANALYSIS_RESULT_DIR = BEHAVIOUR_RESULT_SOURCE_DIR + 'behaviour_analysis_results/'
 BEHAVIOUR_AGREEMENT_ANALYSIS_PATH = BEHAVIOUR_ANALYSIS_RESULT_DIR + "/behaviour_agreements.pdf"
