@@ -114,7 +114,7 @@ def save_all_neural_level_analyses_results(
     save_name_preffix=''
 ):
     directory_path = os.path.join(
-        directory, 'neural_level_analysis', str(epoch), f'seed{seed}'
+        directory,  str(epoch), f'seed{seed}' # 'neural_level_analysis'
     )
     os.makedirs(directory_path, exist_ok=True)
 
@@ -159,7 +159,7 @@ def analysis_multi_models():
 
                 for model_name, saved_model_path in zip(model_names, saved_model_paths):
                     # Replace 'seed1' with the current seed
-                    if model_name != "shifted_TNN_alpha_10_lr_0.05":
+                    if 'shift' not in model_name:
                         #* only 1 seed for shifted_TNN_alpha_10_lr_0.05, so no need to replace
                         saved_model_path = saved_model_path.replace('seed1', f'seed{seed}')
 
@@ -283,7 +283,7 @@ def analysis_multi_models():
                 # Save summarized analyses
                 if SUMMARY_of_NEURAL_LEVEL_ANALYSES:
                     save_all_neural_level_analyses_results(
-                        ANALYSIS_SAVE_DIR,
+                        NEURAL_LEVEL_RESULT_DIR,
                         epoch,
                         seed,
                         model_names,

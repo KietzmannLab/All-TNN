@@ -4,16 +4,17 @@ import os
 # -----------------------  Dataset paths setup  ----------------------
 # -------------------------------------------------------------------
 ANALYSIS_DIR_SUFFIX = ''  # Optionally add a custom suffix at the end of the results directory
-base_path = '/share/klab/datasets/'
-
-STF_PATH = base_path + 'TNN_paper_datasets/analysis_dataset10.h5'  # Scenes, tools, faces datasets for category selectivity analysis
-ECOSET_PATH = base_path + 'ecoset_square256_proper_chunks.h5' # default dataset
+BASE_PATH = '/share/klab/datasets/' # where the ecoset datasets are stored
+ECOSET_PATH = BASE_PATH + 'ecoset_square256_proper_chunks.h5' # default dataset
+ANALYSIS_DIR = '/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/' # where the analysis related data are stored
+STF_PATH = ANALYSIS_DIR + '/datasets/category_selectivity_stimuli.h5'  # Scenes, tools, faces datasets for category selectivity analysis
 
 # -------------------------------------------------------------------
 # -----------------------  Model paths setup  ------------------------
 # -------------------------------------------------------------------
-BASE_DIR = '/share//klab/datasets/TNN_paper_save_dir/All-TNN_share/shared_weights'  #'./save_dir' #* Base directory for all models | for shared weights need run energy analysis from 35 to 600
-BEHAVIOUR_RESULT_SOURCE_DIR  = '/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/behaviour_src/'
+BASE_MODEL_DIR = ANALYSIS_DIR + 'shared_weights/'  # Base directory for all models 
+NEURAL_LEVEL_RESULT_DIR = ANALYSIS_DIR + 'neural_level_src/' + 'neural_analysis_results/' # "./save_dir/_analyses_data/"
+BEHAVIOUR_RESULT_SOURCE_DIR  = ANALYSIS_DIR + 'behaviour_src/'
 VERBOSE = 1              # Whether to display all warnings
 TEST_EPOCH = None        # If specified, use a specific epoch (e.g. 300). Otherwise, traverse the list below.
 TRAVES_EPOCHS = [600]    # e.g. [35,50,100,150,200,250,300,350,400,450,500,550,600]
@@ -22,7 +23,7 @@ EARLY_STOPPING_FLAG = [False, True][1]  # Whether to use early stopping
 # -------------------------------------------------------------------
 # ---------------  Range of seeds and model definitions  -------------
 # -------------------------------------------------------------------
-SEEDS_RANGE = [1, 2, 3, 4, 5][:]
+SEEDS_RANGE = [1, 2, 3, 4, 5][1:]
 
 MODEL_NAMES = [
 
@@ -53,8 +54,8 @@ MODELS_EPOCHS_DICT = {
 MODEL_NAME_PATH_DICT = {
     'Human': None,
 
-    'TNN_simclr_finetune': 'finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks', 
     'shifted_TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks',
+    'TNN_simclr_finetune': 'finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks', 
     
     'CNN': 'tnn_conv_control_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_chunked',
     'LCN': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
@@ -64,9 +65,9 @@ MODEL_NAME_PATH_DICT = {
 
 }
 
-# Prepend BASE_DIR to every path in MODEL_NAME_PATH_DICT (when not None)
+# Prepend BASE_MODEL_DIR to every path in MODEL_NAME_PATH_DICT (when not None)
 MODEL_NAME_PATH_DICT = {
-    model: os.path.join(BASE_DIR, subdir)
+    model: os.path.join(BASE_MODEL_DIR, subdir)
     for model, subdir in MODEL_NAME_PATH_DICT.items() 
     if subdir is not None
 }
@@ -135,10 +136,10 @@ SEARCHLIGHT_RADIUS = 6
 SEARCHLIGHT_STRIDE = 2
 SEARCHLIGHT_N_SPLITS = 3
 
+
 # -------------------------------------------------------------------
 # ---------------  Behaviour-level analysis toggles  ----------------
 # -------------------------------------------------------------------
-
 ANALYSIS_ON_BEHAVIOUR_LEVEL = [False, True][0]  #* Whether to run behavioural-level analyses
 PLOT_NC = False # Plot noise ceiling
 GET_BEHAVIOURAL_DATA = [False, True][1]
@@ -156,7 +157,6 @@ ALIGNMENT_MODES = ['mean']
 BEHAVIOUR_ANALYSIS_MODES = 'individual_model_vs_average_human'
 SIZE_FACTORS = ['relative_white_controlled_original_largest205_min20px_dataset_filtered_num500_grid_fixed_back255',]
 
-
 # Metrics for behavioural analysis
 COLUMNS = ["Model", "Correlation", 'Condition']
 SAMPLING_NUM = 100
@@ -167,10 +167,8 @@ ADM_METRIC = "pearsonr"
 RSA_METRIC = "spearmanr"
 
 # -------------------------------------------------------------------
-# ---------------  Saving directories and filenames  ----------------
+# ---------------  Saving directories and filenames for behaviour  ----------------
 # -------------------------------------------------------------------
-ANALYSIS_SAVE_DIR = "./save_dir/_analyses_data/"
-NEURAL_ANALYSIS_RESULT_DIR = ANALYSIS_SAVE_DIR + 'neural_analysis_results/'
-BEHAVIOUR_ANALYSIS_RESULT_DIR = ANALYSIS_SAVE_DIR + 'behaviour_analysis_results/'
+BEHAVIOUR_ANALYSIS_RESULT_DIR = BEHAVIOUR_RESULT_SOURCE_DIR + 'behaviour_analysis_results/'
 BEHAVIOUR_AGREEMENT_ANALYSIS_PATH = BEHAVIOUR_ANALYSIS_RESULT_DIR + "/behaviour_agreements.pdf"
 ADM_AGREEMENT_ANALYSIS_PATH =  BEHAVIOUR_ANALYSIS_RESULT_DIR + "/adm_agreements.pdf"
