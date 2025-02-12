@@ -12,11 +12,11 @@ ECOSET_PATH = base_path + 'ecoset_square256_proper_chunks.h5' # default dataset
 # -------------------------------------------------------------------
 # -----------------------  Model paths setup  ------------------------
 # -------------------------------------------------------------------
-BASE_DIR = '/share//klab/datasets/TNN_paper_save_dir/All-TNN_public/shared_weights'  #'./save_dir' #* Base directory for all models | for shared weights need run energy analysis from 35 to 600
-BEHAVIOUR_RESULT_SOURCE_DIR  = '/share/klab/datasets/TNN_paper_save_dir/All-TNN_public/behaviour_src/'
+BASE_DIR = '/share//klab/datasets/TNN_paper_save_dir/All-TNN_share/shared_weights'  #'./save_dir' #* Base directory for all models | for shared weights need run energy analysis from 35 to 600
+BEHAVIOUR_RESULT_SOURCE_DIR  = '/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/behaviour_src/'
 VERBOSE = 1              # Whether to display all warnings
 TEST_EPOCH = None        # If specified, use a specific epoch (e.g. 300). Otherwise, traverse the list below.
-TRAVES_EPOCHS = [300]    # e.g. [35,50,100,150,200,250,300,350,400,450,500,550,600]
+TRAVES_EPOCHS = [600]    # e.g. [35,50,100,150,200,250,300,350,400,450,500,550,600]
 EARLY_STOPPING_FLAG = [False, True][1]  # Whether to use early stopping
 
 # -------------------------------------------------------------------
@@ -52,15 +52,15 @@ MODELS_EPOCHS_DICT = {
 #* Should align with the model names in MODELS_EPOCHS_DICT
 MODEL_NAME_PATH_DICT = {
     'Human': None,
+
     'TNN_simclr_finetune': 'finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks', 
     'shifted_TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks',
-
+    
     'CNN': 'tnn_conv_control_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_chunked',
     'LCN': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
     'TNN_alpha_1': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha1.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
     'TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
     'TNN_alpha_100': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha100.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
-
 
 }
 
@@ -155,6 +155,7 @@ MAP_NORM_MODES = ["max"]                # For relative comparison, divide by the
 ALIGNMENT_MODES = ['mean']
 BEHAVIOUR_ANALYSIS_MODES = 'individual_model_vs_average_human'
 SIZE_FACTORS = ['relative_white_controlled_original_largest205_min20px_dataset_filtered_num500_grid_fixed_back255',]
+
 
 # Metrics for behavioural analysis
 COLUMNS = ["Model", "Correlation", 'Condition']

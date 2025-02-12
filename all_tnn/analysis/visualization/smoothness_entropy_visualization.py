@@ -178,7 +178,10 @@ def calculate_radial_entropy(output_dict, model_names):
                 if model not in seed.keys(): 
                     continue
                 else:
-                    layer_entropy_layer = seed[model]['grating_w_entropies'][0][0] 
+                    try:
+                        layer_entropy_layer = seed[model]['grating_w_entropies'][0][0]  # for pickle dict
+                    except: 
+                        layer_entropy_layer = seed[model]['grating_w_entropies']['layer_0'] # for h5
                     layer_entropy = np.squeeze(channels_to_sheet(layer_entropy_layer, return_np=True))
                     center = np.array(layer_entropy.shape) / 2
                     if 'shifted' in model:

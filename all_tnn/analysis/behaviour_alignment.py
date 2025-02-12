@@ -233,23 +233,17 @@ def adm_alignment_analysis(
     )
     
     adm_alignment_data = []
-    
     # Compute noise ceiling
-
     noise_ceiling, _ = compute_adm_noise_ceiling(individual_acc_maps.reshape(num_participants, -1), rsa_metric)
 
     # Create average human ADM
     average_human_adm, _ = create_average_adm(individual_acc_maps, create_adm_metric)
-    
     # Compute individual human ADMs
     human_adms = compute_individual_adms(individual_acc_maps, create_adm_metric)
-    
     # Compute model ADMs
     model_adms, average_model_adms = compute_model_adms(raw_seeds_maps, create_adm_metric, categories_num, updated_model_names)
-    
     # Perform bootstrapping on human ADMs
     bootstrap_human_adms = perform_adm_bootstrapping(individual_acc_maps, create_adm_metric, sampling_num)
-    
     # Compute model-human ADM agreements
     model_human_agreement = compute_model_human_agreement(model_adms, human_adms, rsa_metric)
     

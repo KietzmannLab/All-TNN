@@ -28,7 +28,7 @@ def compute_selectivities(activities_model, dataset_names, data_generators_dict,
         out_activities = [np.concatenate(concat_acts[l]) for l in range(n_layers)]
         mean_activities[f'out_{leave_cat_out}'] = [np.mean(a, axis=0) for a in out_activities]
         var_activities[f'out_{leave_cat_out}'] = [np.var(a, axis=0) for a in out_activities]
-        n_samples[f'out_{leave_cat_out}'] = out_activities[0].shape[0] #! out_activities[0] is the activities of the first layer
+        n_samples[f'out_{leave_cat_out}'] = out_activities[0].shape[0] # out_activities[0] is the activities of the first layer
 
     category_selectivities = {
         'mean_activities': mean_activities,
