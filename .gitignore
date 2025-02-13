@@ -49,3 +49,6 @@ all_tnn/models/__pycache__/*
 all_tnn/models/layers/__pycache__
 all_tnn/models/layers/__pycache__/*
 build/
+
+pyproject.toml
+.pre-commit-config.yaml
