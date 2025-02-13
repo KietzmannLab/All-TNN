@@ -68,7 +68,7 @@ def plot_predictors(plot_path, predictors_dict, predictor_names, names, reordere
         axs[i].set_title(predictor_names[i], fontsize=20)
         axs[i].tick_params(left=False, bottom=False, right=False, top=False)
     plt.tight_layout()
-    plt.savefig(op.join(plot_path, f'predictors{reordered_str}.png'))
+    plt.savefig(op.join(plot_path, f'predictors{reordered_str}.pdf'),dpi=300)
     plt.close()
 
 def hierarchical_clustering(plot_path, data, names, method='average', plot=1):
@@ -95,7 +95,7 @@ def hierarchical_clustering(plot_path, data, names, method='average', plot=1):
             plt.setp(c_map.ax_heatmap.get_yticklabels(), weight='bold')
             plt.setp(c_map.ax_heatmap.get_xticklabels(), rotation=45, ha="right", weight='bold')
             c_map.ax_heatmap.tick_params(axis='both', which='both', length=0)
-            plt.savefig(op.join(plot_path, f'{model_type}_{method}_cluster_map_human_corr_matrix_human_order.png'))    
+            plt.savefig(op.join(plot_path, f'{model_type}_{method}_cluster_map_human_corr_matrix_human_order.pdf'), dpi=300)    
             plt.close()
 
     return row_link, ordered_categories
@@ -165,7 +165,7 @@ def bar_plot_vars(model_vars, predictor_names, plot_path):
         ax.tick_params(which='both', right=False, top=False, bottom=False)
         ax.set_ylabel('Variance explained')
         plt.tight_layout()
-        plt.savefig(op.join(plot_path, f'var_explained_glm_avg.png'))
+        plt.savefig(op.join(plot_path, f'var_explained_glm_avg.pdf'))
         plt.close()
 
 def bar_indiv_humans(human_indiv_unique_vars, predictor_names, plot_path):
@@ -184,7 +184,7 @@ def bar_indiv_humans(human_indiv_unique_vars, predictor_names, plot_path):
         ax.tick_params(which='both', right=False, top=False, bottom=False)
         ax.set_ylabel('Variance explained')
         plt.tight_layout()
-        plt.savefig(op.join(plot_path, f'var_explained_glm_indiv.png'))
+        plt.savefig(op.join(plot_path, f'var_explained_glm_indiv.pdf'), dpi=300)
         plt.close()
 
 def run_full_GLM_analysis(
@@ -274,8 +274,13 @@ def run_full_GLM_analysis(
     unique_vars = [all_vars[name] for name in all_plot_names]
 
     # Permutation test for significance
+        # import pdb;pdb.set_trace()
     permuted_partitions = []
+    # Convert the h5py dataset to a NumPy array
+    target_data = np.array(target_data)
+    
     for n in range(num_permutations):
+        
         shuffle_idx = np.random.permutation(target_data.shape[0])
         shuffled_target = target_data[shuffle_idx][:, shuffle_idx]
         these_vars, _ = unique_variances(

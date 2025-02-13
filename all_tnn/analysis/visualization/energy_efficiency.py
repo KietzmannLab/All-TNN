@@ -69,7 +69,7 @@ def plot_energy_consumption_across_epochs_lineplot(
     seed_range=range(1, 6), 
     models_epochs_dict=None, 
     NORM_PREV_LAYER=True, 
-    NORM_LAYER_OUT=False,
+    NORM_LAYER_OUT=True,
     show_plot=False,
 ):
     plt.rcParams['font.family'] = 'sans-serif'
@@ -142,10 +142,10 @@ def plot_energy_consumption_across_epochs_lineplot(
     ax.set_xticklabels([str(epoch) for epoch in fixed_epochs])
     ax.tick_params(which='both', top=False, right=False)  # Disable top and right ticks #  bottom=False,
     ax.legend()
-    sns.despine(trim=True, left=False)  # Remove top and right spines
+    sns.despine()  # Remove top and right spines
     
     if save_fig_path:
-        plt.savefig(os.path.join(save_fig_path, 'energy_consumption_across_epochs_line.png'), dpi=300)
+        plt.savefig(os.path.join(save_fig_path, 'energy_consumption_across_epochs_line.pdf'), dpi=300)
         plt.close()
     if show_plot: plt.show()
     else: plt.close() 
@@ -160,7 +160,7 @@ def plot_stacked_energy_map_energy_vs_eccentricity(model_name_path_dict, alphas,
 
         rad_energy_dict = defaultdict(dict)
         for model_name, base_path in model_name_path_dict.items():
-            if 'finetune' in model_name.lower(): #* finetune and non-finetune models are the same in representation level
+            if 'finetune' in model_name.lower() or 'shift' in model_name.lower(): #* finetune and non-finetune models are the same in representation level, or shift model is not needed
                 continue
 
             alpha = alphas[model_name]
@@ -189,7 +189,8 @@ def plot_radial_energy(rad_energy_dict, cmap, model_names, legend_names, save_di
     fig, ax = plt.subplots(figsize=(3.54, 2)) # half width of NHB
 
     for model in model_names:
-        if 'finetune' in model.lower(): #* finetune and non-finetune models are the same in representation level
+        if 'finetune' in model.lower() or 'shift' in model.lower():
+            #* finetune and non-finetune models are the same in representation level
             continue
         energy_profiles_layer = [seed for seed in rad_energy_dict[model].values()]
         e_layer_1D_mean = np.mean(energy_profiles_layer, axis=0)
@@ -224,7 +225,7 @@ def plot_stacked_energy_maps_normalized(model_name_path_dict, alphas, save_fig_p
     vmin, vmax = 0, 1  # Adjust these based on known or expected data range for normalization
 
     for seed in seed_range:
-        plt.figure(figsize=(15, 3 * len(model_name_path_dict) * len(prefix_list) * len(energy_consumption_types)))
+        plt.figure(figsize=(3 * len(model_name_path_dict) * len(prefix_list) * len(energy_consumption_types),15))
         plt.subplots_adjust(hspace=0.4, wspace=0.4)  # Adjust space between plots
 
         # Plotting index
@@ -270,12 +271,12 @@ def plot_stacked_energy_maps_normalized(model_name_path_dict, alphas, save_fig_p
                     stacked_energy_map = stacked_energy_map / np.max(stacked_energy_map)
 
                 # Plotting
-                ax = plt.subplot(len(model_name_path_dict) * len(prefix_list) * len(energy_consumption_types), 1, plot_index)
+                ax = plt.subplot(1, len(model_name_path_dict) * len(prefix_list) * len(energy_consumption_types), plot_index)
                 cax = ax.imshow(stacked_energy_map, cmap='viridis', vmin=vmin, vmax=vmax) #! default
                 # cax = ax.imshow(stacked_energy_map, cmap='viridis') #! supplementary
                 # if plot_index % len(model_name_path_dict) == 1:
                 plt.colorbar(cax, ax=ax, orientation='horizontal', fraction=0.046, pad=0.04)  # Adjust colorbar size and padding
-                ax.set_title(f"{model_name} - {energy_type} - Alpha: {alpha} - Seed: {seed}", fontsize=10)
+                ax.set_title(f"{model_name}", fontsize=10)
                 # ax.set_xlabel('Layers', fontsize=8)
                 # ax.set_ylabel('Channels', fontsize=8)
                 

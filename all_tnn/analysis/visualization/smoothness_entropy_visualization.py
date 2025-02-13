@@ -55,7 +55,7 @@ def plot_fft(output_dict, cmap, model_names, base_path):
             axs[i].spines['right'].set_visible(False)
             axs[i].legend()
 
-        plt.savefig(f'{base_path}/fft_avg_cat_{len(output_dict)}seeds.png')
+        plt.savefig(f'{base_path}/fft_avg_cat_{len(output_dict)}seeds.pdf')
         plt.close()
 
 def get_radial_profile(data, center):
@@ -83,7 +83,7 @@ def plot_pinwheel_vs_eccentricity(output_dict, cmap, base_path):
     plt.ylabel('Pinwheel density  / entropy')
     plt.xlabel('Eccentricity')
     plt.legend() 
-    plt.savefig(f'{base_path}/radial_profile_pw_entr_div.png')
+    plt.savefig(f'{base_path}/radial_profile_pw_entr_div.pdf')
     plt.close()
 
 
@@ -123,7 +123,7 @@ def plot_cluster_size(output_dict, cmap, model_names, base_path, stats=False, sa
                         significance_dict[(i, j)] = fdr_corrected_p         
         
         plt.tight_layout()
-        if save: plt.savefig(f'{base_path}/cluster_size_{len(output_dict)}seeds.png', dpi=200)
+        if save: plt.savefig(f'{base_path}/cluster_size_{len(output_dict)}seeds.pdf', dpi=200)
         if show: plt.show()
         plt.close()
 
@@ -141,16 +141,18 @@ def cluster_size_vs_eccentricity(output_dict, cmap, model_names, base_path, save
 
         for i, model in enumerate(model_names):
             model_radial_dict[model] = []
-            for seed in output_dict:
-                layer_size = int(np.sqrt(len(seed[model]['smoothness_analysis']['cluster_size']['os_sheet'])))
+            for seed_dict in output_dict:
+                layer_size = int(np.sqrt(len(seed_dict[model]['smoothness_analysis']['cluster_size']['os_sheet'])))
                 matrix_cluster_sizes = np.zeros((layer_size, layer_size))
-                for key, value in seed[model]['smoothness_analysis']['cluster_size']['os_sheet'].items():
+                for key, value in seed_dict[model]['smoothness_analysis']['cluster_size']['os_sheet'].items():
                     matrix_cluster_sizes[key] = value
                 
                 radial_profile = get_radial_profile(matrix_cluster_sizes, np.array(matrix_cluster_sizes.shape) // 2)
                 model_radial_dict[model].append(radial_profile)
-            
-            means = np.mean(model_radial_dict[model], axis=0)
+            try:
+                means = np.mean(model_radial_dict[model], axis=0)
+            except:
+                import pdb; pdb.set_trace()
             ci_low, ci_high = stats.t.interval(0.95, len(model_radial_dict[model])-1, loc=means, scale=stats.sem(model_radial_dict[model]))
             
             ax.plot(means, label=model_names[i], color=cmap[model_names.index(model)])
@@ -166,7 +168,7 @@ def cluster_size_vs_eccentricity(output_dict, cmap, model_names, base_path, save
         ax.tick_params(which='both', right=False, top=False)#
         plt.legend()
         plt.tight_layout()
-        if save: plt.savefig(f'{base_path}/cluster_size_vs_eccentricity.png')
+        if save: plt.savefig(f'{base_path}/cluster_size_vs_eccentricity.pdf')
         if show: plt.show()
         plt.close()
 
@@ -210,7 +212,7 @@ def plot_radial_entropy(rad_energy_dict, cmap, model_names, save_dir, save=True,
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.legend(loc='lower right')
-    if save: plt.savefig(os.path.join(save_dir, 'radial_entropy_profile.png'), dpi=200)
+    if save: plt.savefig(os.path.join(save_dir, 'radial_entropy_profile.pdf'), dpi=200)
     if show: plt.show()
     plt.close()
 

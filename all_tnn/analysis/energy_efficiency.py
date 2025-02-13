@@ -262,7 +262,7 @@ def analyze_activation_transmission_efficiency(
     print(f'mean of stacked_total_energy_map: {np.mean(stacked_total_energy_map)}')
 
     # Save stacked maps
-    energy_map_folder = os.path.join(analysis_dir_path, 'energy_maps')
+    energy_map_folder = analysis_dir_path 
     os.makedirs(energy_map_folder, exist_ok=True)
 
     total_map_fname = (
@@ -273,9 +273,7 @@ def analyze_activation_transmission_efficiency(
     # np.save(os.path.join(energy_map_folder, mean_map_fname), stacked_mean_energy_map)
     np.save(os.path.join(energy_map_folder, total_map_fname), stacked_total_energy_map)
 
-    # Plot per-layer mean energy consumption maps + radial distribution
-    layer_maps_dir = os.path.join(analysis_dir_path, 'energy_maps_and_trend_from_center')
-    os.makedirs(layer_maps_dir, exist_ok=True)
+    # Plot per-layer mean energy consumption maps 
 
     for layer_i, mean_energy_map in tqdm(
         enumerate(mean_energy_consumption_map_across_layers),

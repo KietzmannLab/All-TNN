@@ -108,9 +108,7 @@ class Config:
 
         self.CATEGORIZATION_PERFORMANCE = [False, True][1]  # Accuracy analysis
         self.GET_SPATIAL_LOSS = [False, True][1]  # Spatial loss
-        self.ORIENTATION_SELECTIVITY = [False, True][
-            1
-        ]  # Analyze energy efficiency
+        self.ORIENTATION_SELECTIVITY = [False, True][1]  # Analyze energy efficiency
         self.CATEGORY_STATS = [False, True][1]
         self.SMOOTHNESS = [False, True][1]  # Calculate model smoothness
         self.ENERGY_EFFICIENCY = [False, True][1]
