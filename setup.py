@@ -1,5 +1,10 @@
 from setuptools import find_packages, setup
-
+import os
+version = {}
+version_path = os.path.join(os.path.dirname(__file__), "all_tnn", "_version.py")
+with open(version_path) as f:
+    exec(f.read(), version)
+    
 # List your dependencies here (remove any duplicate entries)
 install_requires = [
     "h5py<=3.8.0",
