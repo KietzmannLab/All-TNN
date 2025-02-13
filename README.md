@@ -21,7 +21,7 @@ This repository, available at [KietzmannLab/All-TNN](https://github.com/Kietzman
 
    Download the analysis data from the storage into `save_dir` to be able to visualize all figures, or generate the results yourself using `analysis.py` (see below). 
 
-   **To reproduce the main figures in the paper, use `plot_main_analysis.ipynb`** 
+   **To reproduce the main figures in the paper, use `plot_main_analysis.py`** 
 
 ### Prerequisites
 
@@ -58,7 +58,7 @@ python scripts/analysis.py
 **Note:** computing several of these analyses can be very time-consuming, in particular retrieving model activations on test datasets. The results of all analyses can be downloaded pre-computed at the `save_dir` in the [OSF repository](https://osf.io/6m3g4/?view_only=2950b15542c84d7ca53a7312238a2980)
 Memory requirements: <300GB. For calculating the energy consumption of a model on the test set, 500GB is required, because all activations of all layers on the test set need to be kept in memory. 
 ### Visualizing results
-To reproduce the main figures in the paper, make sure you have computed or downloaded the analysis data and checkpoints, and run `plot_main_analysis.ipynb`.
+To reproduce the main figures in the paper, make sure you have computed or downloaded the analysis data and checkpoints, and run `plot_main_analysis.py`.
 
 ### Loading and Testing Models
 

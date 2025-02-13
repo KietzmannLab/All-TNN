@@ -95,46 +95,23 @@ plot_bar_plot_from_df(df, plot_path_fig1+'/mean_cosdist_compare_across_alphas.pd
 #* Figure 2 orientation and category selectivity 
 ############################################################################################################
 # Loading in pickle way / can also load in H5 way
+
+# Orientation selectivity maps, entropy of first layer orientation selectivity, and category selectivity maps.
 seed = 1
 model_name = "TNN_alpha_10" # or pick another model
 datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/seed{seed}/'
 with open(datapath + 'all_multi_models_neural_dict.pickle', 'rb') as handle:
     def nested_dict(): return defaultdict(nested_dict)
     model_results_dict = pickle.load(handle)
-
-# Orientation selectivity maps, entropy of first layer orientation selectivity, and category selectivity maps.
 vis = visualize_layer(model_results_dict["TNN_alpha_10"], 300, layer_i=0, analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
-
-## Loading in H5 way
-# seed = 1
-# model_name = "TNN_alpha_10" # or pick another model
-# seed_results = neural_level_h5_file_dir + f"/seed{seed}/all_multi_models_neural_dict.h5"
-# model_results_dict = read_h52dict(seed_results)
-# # Loading in H5 way
-# all_data = []
-# for seed in config.SEEDS_RANGE: 
-#     # h5_file_path = neural_level_h5_file_dir + f"/seed{seed}/all_multi_models_neural_dict.h5"
-#     model_results_dict = read_h52dict(h5_file_path)
-#     all_data.append(model_results_dict)
-
-# Or loading in pickle way
-# all_data = []
-# for seed in config.SEEDS_RANGE: 
-#     datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/seed{seed}/'
-#     with open(datapath + 'all_multi_models_neural_dict.pickle', 'rb') as handle:
-#         def nested_dict(): return defaultdict(nested_dict)
-#         model_results_dict = pickle.load(handle)
-#         all_data.append(model_results_dict)
-
 
 # Radial entropy profile
 all_data = []
 datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/'
-for seed in config.SEEDS_RANGE:: #seeds
+for seed in config.SEEDS_RANGE:: 
     with open(os.path.join(datapath, f'seed{seed}/all_multi_models_neural_dict.pickle'), 'rb') as handle: 
         def nested_dict(): return defaultdict(nested_dict)
         all_data.append(pickle.load(handle))
-
 ent_dict = calculate_radial_entropy(all_data, config.MODEL_NAMES)
 plot_radial_entropy(ent_dict, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
 
