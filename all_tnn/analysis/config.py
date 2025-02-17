@@ -6,7 +6,7 @@ class Config:
     def __init__(
         self,
         base_path="/share/klab/datasets/",
-        analysis_dir="/share/klab/datasets/TNN_paper_save_dir/All-TNN_share-test-varun/",
+        analysis_dir="/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/",
     ):
         # -------------------------------------------------------------------
         # -----------------------  Dataset paths setup  ----------------------

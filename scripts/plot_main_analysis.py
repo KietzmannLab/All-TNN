@@ -34,8 +34,8 @@ color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:]
 
 ############################################################################################################
 #* Setting up the directories for the analysis
-# Setting Paths to where the data is stored
 ############################################################################################################
+# Setting Paths to where the data is stored
 source_dir = '/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/'
 neural_level_src_dir = os.path.join(source_dir, 'neural_level_src')
 behaviour_src_dir = os.path.join(source_dir, 'behaviour_src')
