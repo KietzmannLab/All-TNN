@@ -57,9 +57,8 @@ def generate_analysis_df(
     # Loop over each model and seed to collect data
     for model_name in MODEL_NAMES:
         print(f"Loading model_name = {model_name}")
-        # model_name = model_name
         for seed in seeds_range:
-            print(f"Loading seed = {seed}")
+            print(f"Loading seed {seed}/5", end="\r")
             src_path = os.path.join(
                 base_src_dir_path,
                 f'seed{seed}/{model_results_dict_filename}'

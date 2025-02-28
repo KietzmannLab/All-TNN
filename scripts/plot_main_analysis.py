@@ -99,7 +99,8 @@ print('Figure 2: Orientation and category selectivity')
 seed = 1
 model_name = "TNN_alpha_10" # or pick another model
 model_results_dict_one_seed = read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5'))
-vis = visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_0', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
+visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_0', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
+visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_5', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
 
 # Radial entropy profile
 all_data = []

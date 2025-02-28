@@ -87,26 +87,27 @@ def save_dict_to_h5(h5_group, dictionary):
                     if isinstance(value, tuple) or isinstance(value, list):
                         if len(value) != 6:
                             for order, value_item in enumerate(value):
-                                    if len(value_item.shape) == 1:
-                                        squeezed_value = value_item.squeeze()
-                                        for i in range(len(squeezed_value)):
-                                            item = squeezed_value[i]
-                                            if not isinstance(item, dict):
-                                                h5_group.create_dataset(f'{key}/{order}/layer_{i}', data=item)
-                                            else:
-                                                for sub_key, sub_value in item.items():
-                                                    if isinstance(sub_value, (int, float, np.ndarray, list, tuple)):
+                                    #if len(value_item.shape) == 1:
+                                squeezed_value = value_item.squeeze()
+                                for i in range(len(squeezed_value)):
+                                    item = squeezed_value[i]
+                                    if not isinstance(item, dict):
+                                        h5_group.create_dataset(f'{key}/{order}/layer_{i}', data=item)
+                                    else:
+                                        for sub_key, sub_value in item.items():
+                                            if isinstance(sub_value, (int, float, np.ndarray, list, tuple)):
+                                                try:
+                                                    h5_group.create_dataset(f'{key}/{order}/layer_{i}/{sub_key}', data=np.array(sub_value))
+                                                except Exception:
+                                                    raise ValueError(f'Cannot store {sub_key} with shape {sub_value.shape}')
+                                            elif isinstance(sub_value, dict):
+                                                for sub_sub_key, sub_sub_value in sub_value.items():
+                                                    if isinstance(sub_sub_value, (int, float, np.ndarray, list, tuple)):
                                                         try:
-                                                            h5_group.create_dataset(f'{key}/{order}/layer_{i}/{sub_key}', data=np.array(sub_value))
+                                                            h5_group.create_dataset(f'{key}/{order}/layer_{i}/{sub_key}/{sub_sub_key}', data=np.array(sub_sub_value))
                                                         except Exception:
-                                                            raise ValueError(f'Cannot store {sub_key} with shape {sub_value.shape}')
-                                                    elif isinstance(sub_value, dict):
-                                                        for sub_sub_key, sub_sub_value in sub_value.items():
-                                                            if isinstance(sub_sub_value, (int, float, np.ndarray, list, tuple)):
-                                                                try:
-                                                                    h5_group.create_dataset(f'{key}/{order}/layer_{i}/{sub_key}/{sub_sub_key}', data=np.array(sub_sub_value))
-                                                                except Exception:
-                                                                    raise ValueError(f'Cannot store {sub_sub_key} with shape {sub_sub_value.shape}')
+                                                            raise ValueError(f'Cannot store {sub_sub_key} with shape {sub_sub_value.shape}')
+
                         else: # if list of 6 layers
                             for layer, value_item in enumerate(value):
                                 if not isinstance(value_item, dict):
@@ -134,7 +135,6 @@ def convert_dict2h5(dict_file, h5_file=None):
     elif dict_file.endswith('.h5'):
         data_dict = h5py.File(dict_file, 'r')
     else: print("Not h5/pickle: try to open the file differently")
-
     model_names = list(data_dict.keys())
     # Ensure the base directory exists.
     base_dir = os.path.dirname(dict_file)
@@ -162,5 +162,5 @@ def convert_dict2h5(dict_file, h5_file=None):
 if __name__ == '__main__':
     for seed in range(1, 6):
         # dict_path = f'./save_dir/_analyses_data/neural_level_analysis/300/seed{seed}/all_multi_models_neural_dict.pickle'
-        dict_path = f'./neural_level_src/neural_level_analysis/seed{seed}/all_multi_models_neural_dict.pickle'
+        dict_path = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/seed{seed}/all_multi_models_neural_dict.pickle'
         convert_dict2h5(dict_path, h5_file= f'save_dir/seed{seed}/all_multi_models_neural_dict.h5')

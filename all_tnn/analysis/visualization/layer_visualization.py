@@ -41,7 +41,7 @@ def visualize_layer(
     config = Config()
     layer_i = f'layer_{layer_i}' if 'layer_' not in layer_i else layer_i
 
-    if config.CATEGORY_STATS:
+    if config.CATEGORY_STATS and '5' in layer_i:
         if "category_selectivities" in output_dict:
             print(f"Getting category selectivity maps for layer {layer_i}")
             mean_maps = {
@@ -75,19 +75,17 @@ def visualize_layer(
                 dprime_maps,
                 epoch,
                 layer_i,
+                model_name,
                 analysis_dir,
                 save=save,
                 show=show,
             )
 
-    if config.ORIENTATION_SELECTIVITY:
+    if config.ORIENTATION_SELECTIVITY and '0' in layer_i:
         if "grating_w_tuning_curves" in output_dict:
-            print(
-                f"Getting orientation selectivity and entropy maps for layer {layer_i}"
-            )
+            print(f"Getting orientation selectivity and entropy maps for layer {layer_i}")
             for i_w, f in enumerate(config.WAVELENGTHS):
-
-                hue = output_dict["grating_w_tuning_curves"][0][layer_i][i_w]
+                hue = output_dict["grating_w_tuning_curves"][str(i_w)][layer_i]
 
                 # These are the orientation selectivity maps
                 data_dict[f"activations_w{config.WAVELENGTHS[i_w]}"] = {
@@ -98,14 +96,10 @@ def visualize_layer(
                     "cm": plt.cm.hsv,
                 }
 
-                # Entropy maps
-                for i_w, entropies in enumerate(
-                    output_dict["grating_w_entropies"][layer_i]
-                ):
-                    data_dict[f"entropies_w{i_w}"] = {
-                        "data": np.expand_dims(entropies, axis=0),
-                        "cm": plt.cm.gray,
-                    }
+                data_dict[f"entropies_w{i_w}"] = {
+                    "data": np.expand_dims(output_dict["grating_w_entropies"][layer_i], axis=0),
+                    "cm": plt.cm.gray,
+                }
         # Iterate over plot types and plot
         for p_type, data in data_dict.items():
             plot_orientation_entropy_maps(
@@ -113,6 +107,7 @@ def visualize_layer(
                 data,
                 epoch,
                 layer_i,
+                model_name,
                 analysis_dir,
                 save=save,
                 show=show,
@@ -187,7 +182,7 @@ def visualize_layer(
 
 
 def plot_category_selectivity_maps(
-    data_dict, dprime_maps, epoch, layer_i, analysis_dir, save=True, show=False
+    data_dict, dprime_maps, epoch, layer_i, model_name, analysis_dir, save=True, show=False
 ):
     # plot with showing the max dprime for each neuron in one different color per category
     fig, ax = plt.subplots()
@@ -214,11 +209,8 @@ def plot_category_selectivity_maps(
         masked_dprime_sheet = mask_array_by_value(dprime_sheets[k], 0)
         data_dict[f"masked_dprime_sheet_layer{layer_i}_{k}"] = {}
         data_dict[f"masked_dprime_sheet_layer{layer_i}_{k}"][
-            "data"
-        ] = masked_dprime_sheet
-        data_dict[f"masked_dprime_sheet_layer{layer_i}_{k}"][
-            "shape"
-        ] = "skip_plotting"
+            "data"] = masked_dprime_sheet
+        data_dict[f"masked_dprime_sheet_layer{layer_i}_{k}"]["shape"] = "skip_plotting"
         this_plt = ax.imshow(
             masked_dprime_sheet,
             interpolation="nearest",
@@ -233,17 +225,15 @@ def plot_category_selectivity_maps(
     if save:
         os.makedirs(f"{analysis_dir}/category_selectivity/", exist_ok=True)
         plt.savefig(
-            f"{analysis_dir}/category_selectivity/dprime_combined_layer{layer_i}_ep{epoch}.png",
+            f"{analysis_dir}/category_selectivity/dprime_combined_{model_name}_{layer_i}_ep{epoch}.png",
             dpi=300,
         )
 
         # pickle d' sheet
         print(f"Saving dprime sheets for layer {layer_i}")
         with open(
-            f"{analysis_dir}/category_selectivity/dprime_sheets_layer{layer_i}.pkl",
-            "wb",
-        ) as f:
-            pickle.dump(dprime_sheets, f)
+            f"{analysis_dir}/category_selectivity/dprime_sheet_{model_name}_{layer_i}.pkl","wb",) as f:
+                pickle.dump(dprime_sheets, f)
 
     plt.close("all")
     return data_dict
@@ -254,6 +244,7 @@ def plot_orientation_entropy_maps(
     data,
     epoch,
     layer_i,
+    model_name,
     analysis_dir,
     mask_value=0,
     save=True,
@@ -303,7 +294,7 @@ def plot_orientation_entropy_maps(
         plt.savefig(
             fname=os.path.join(
                 dir,
-                f"layer{layer_i}_{plot_type}.png",
+                f"{model_name}_{layer_i}_{plot_type}.png",
             ),
             bbox_inches="tight",
             pad_inches=0,
@@ -412,9 +403,7 @@ def cosine_similarity(vec1, vec2):
     return sim
 
 
-def save(
-    fig, name: str, ext: str = "pdf", dpi: int = 300, close_after: bool = False
-):
+def save(fig, name: str, ext: str = "pdf", dpi: int = 300, close_after: bool = False):
     """from analysis.util import plot_utils"""
     from pathlib import Path
 
