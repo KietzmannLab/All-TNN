@@ -2,14 +2,14 @@
 # Read before running the script:
 #
 # This script is used to generate the figures in the main analysis section of the paper.
-# Note: Running this notebook requires downloading the output dict of all analyses, 
+# Note: Running this notebook requires downloading the output dict of all analyses,
 # which can be found in the OSF repository. Alternatively, generate it via analysis.py (see README).
-# All constants are defined in analysis/config.py, 
+# All constants are defined in analysis/config.py,
 # e.g. uncomment MODELS_EPOCHS_DICT in analysis/config.py for the models you want to analyze.
 #
 ############################################################################################################
 
-import os, pickle
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -26,10 +26,10 @@ from all_tnn.analysis.visualization.smoothness_entropy_visualization import calc
 from all_tnn.analysis.glm_analysis import run_full_GLM_analysis
 
 # Set plotting style
-import scienceplots  
+import scienceplots
 plt.style.use(['science', 'nature', "ieee", 'no-latex'])
 from all_tnn.analysis.visualization.colors import DECREASING_6COLORS, COLOR_THEME_WITH_ALPHA_SWEEP
-color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:] 
+color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:]
 
 
 ############################################################################################################
@@ -44,11 +44,11 @@ config = Config(base_path = '/share/klab/datasets/',   analysis_dir = source_dir
 
 # List of additional directories to create
 directories = [
-    os.path.join(source_dir, 'plots', 'figure1'),   
-    os.path.join(source_dir, 'plots', 'figure2'),        
-    os.path.join(source_dir, 'plots', 'figure3'),        
-    os.path.join(source_dir, 'plots', 'figure4'), 
-    os.path.join(source_dir, 'plots', 'figure5'), 
+    os.path.join(source_dir, 'plots', 'figure1'),
+    os.path.join(source_dir, 'plots', 'figure2'),
+    os.path.join(source_dir, 'plots', 'figure3'),
+    os.path.join(source_dir, 'plots', 'figure4'),
+    os.path.join(source_dir, 'plots', 'figure5'),
 ]
 
 # Iterate over the list and create each directory
@@ -63,7 +63,7 @@ plot_path_fig1, plot_path_fig2, plot_path_fig3, plot_path_fig4, plot_path_fig5 =
 ############################################################################################################
 #* Figure 1 Accuracies and spatial smoothness
 ############################################################################################################
-
+print('Figure 1: Accuracy and spatial smoothness')
 # Categorization performance
 # Classification accuracy of all All-TNNs and control models on the ecoset test set. Running these cells will plot the figures and save them to save_dir
 df = generate_analysis_df(
@@ -74,9 +74,9 @@ df = generate_analysis_df(
     MODEL_NAMES_TO_PLOT=config.MODEL_NAMES_TO_PLOT,
     model_results_dict_filename='all_multi_models_neural_dict.h5', # or default is multi_models_neural_dict.pickle
 )
-plot_bar_plot_from_df(df, plot_path_fig1+'/accuracy_compare_across_alphas.pdf', 
-                               x="Model", y="Accuracy", 
-                               title = "Categorisation performance", 
+plot_bar_plot_from_df(df, plot_path_fig1+'/accuracy_compare_across_alphas.pdf',
+                               x="Model", y="Accuracy",
+                               title = "Categorisation performance",
                                color3_start_id = 1,
                                show_plot = True,
                                figsize=(3.54, 2))
@@ -84,34 +84,27 @@ plot_bar_plot_from_df(df, plot_path_fig1+'/accuracy_compare_across_alphas.pdf',
 # Spatial smoothness
 # Spatial smoothness is calculated as as 1/average cosine similarity between the weights of neighbouring units for all models.
 plot_bar_plot_from_df(df, plot_path_fig1+'/mean_cosdist_compare_across_alphas.pdf',
-                                    x="Model", y="Spatial Smoothness", 
-                                    title = "Spatial smoothness", 
+                                    x="Model", y="Spatial Smoothness",
+                                    title = "Spatial smoothness",
                                     color3_start_id = 1,
                                     show_plot = True,
                                     log_scale = True, #! log scale
                                     figsize=(3.54, 2))
 
 ############################################################################################################
-#* Figure 2 orientation and category selectivity 
+#* Figure 2 orientation and category selectivity
 ############################################################################################################
-# Loading in pickle way / can also load in H5 way
-
+print('Figure 2: Orientation and category selectivity')
 # Orientation selectivity maps, entropy of first layer orientation selectivity, and category selectivity maps.
 seed = 1
 model_name = "TNN_alpha_10" # or pick another model
-datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/seed{seed}/'
-with open(datapath + 'all_multi_models_neural_dict.pickle', 'rb') as handle:
-    def nested_dict(): return defaultdict(nested_dict)
-    model_results_dict = pickle.load(handle)
-vis = visualize_layer(model_results_dict["TNN_alpha_10"], 300, layer_i=0, analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
+model_results_dict_one_seed = read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5'))
+vis = visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_0', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
 
 # Radial entropy profile
 all_data = []
-datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/'
-for seed in config.SEEDS_RANGE:: 
-    with open(os.path.join(datapath, f'seed{seed}/all_multi_models_neural_dict.pickle'), 'rb') as handle: 
-        def nested_dict(): return defaultdict(nested_dict)
-        all_data.append(pickle.load(handle))
+for seed in config.SEEDS_RANGE:
+    all_data.append(read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5')))
 ent_dict = calculate_radial_entropy(all_data, config.MODEL_NAMES)
 plot_radial_entropy(ent_dict, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
 
@@ -123,6 +116,7 @@ cluster_size_vs_eccentricity(all_data, color_palette, config.MODEL_NAMES, plot_p
 ############################################################################################################
 #* Figure 3 Energy consumption
 ############################################################################################################
+print('Figure 3: Energy consumption')
 # Fig3A Energy consumption across epochs
 epochs_to_plot = [35] + list(range(50,601,50))
 plot_energy_consumption_across_epochs_lineplot(
@@ -157,7 +151,7 @@ plot_stacked_energy_maps_normalized(
         pre_or_postrelu='postrelu',
         prefix_list=[ 'ali_'],
         energy_consumption_types= ['total'],
-        seed_range= [1], 
+        seed_range= [1],
         models_epochs_dict=config.MODELS_EPOCHS_DICT,
         NORM_PREV_LAYER=True,
         NORM_LAYER_OUT=False,
@@ -167,6 +161,7 @@ plot_stacked_energy_maps_normalized(
 ############################################################################################################
 #* Figure 4 Behavioural analysis
 ############################################################################################################
+print('Figure 4: Behavioural analysis')
 # Human object-specific biases are predicted by animacy and real-world size.
 # Non-negative least squares GLM analysis on the averaged human ADM shows significant unique variance explained by animacy and real-world size.
 glm_results = run_full_GLM_analysis(
@@ -198,5 +193,5 @@ plot_bar_plot_from_df(df_adm_agreement,
 ############################################################################################################
 #* Figure 5 SimCLR
 # Figure 5 is produced by re-running the code for Figures 1–4 for the self-supervised (SimCLR) All-TNN ( alpha = 10)
-#  and the supervised All-TNN ( alpha = 10) models.
+#  and the supervised All-TNN (alpha = 10) models.
 ############################################################################################################

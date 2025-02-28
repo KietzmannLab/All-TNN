@@ -34,30 +34,28 @@ def visualize_layer(
     show=False,
 ):
     """
-    Main visualisation function (inclueds Category Selectivity, Orientation Selectivity, Distance vs Weight Similarity)
+    Main visualisation function (includes Category Selectivity, Orientation Selectivity, Distance vs Weight Similarity)
     Collect relevant data for the specified layer(s) and make all plots
     """
     data_dict = dict()
     config = Config()
-    print(config.CATEGORY_STATS, output_dict.keys())
+    layer_i = f'layer_{layer_i}' if 'layer_' not in layer_i else layer_i
+
     if config.CATEGORY_STATS:
         if "category_selectivities" in output_dict:
             print(f"Getting category selectivity maps for layer {layer_i}")
             mean_maps = {
                 k: output_dict["category_selectivities"]["selectivity"][
-                    "mean_activities"
-                ][k][layer_i]
+                    "mean_activities"][k][layer_i]
                 for k in output_dict["category_selectivities"]["selectivity"][
-                    "mean_activities"
-                ].keys()
+                    "mean_activities"].keys()
             }
             variance_maps = {
                 k: output_dict["category_selectivities"]["selectivity"][
                     "var_activities"
                 ][k][layer_i]
                 for k in output_dict["category_selectivities"]["selectivity"][
-                    "var_activities"
-                ].keys()
+                    "var_activities"].keys()
             }
 
             # Calculate dprime from mean&variance selectivity maps
