@@ -28,6 +28,7 @@ from all_tnn.analysis.util.analysis_help_funcs import load_and_override_hparams,
 from all_tnn.analysis.util.convert_dict2h5 import convert_dict2h5
 from all_tnn.analysis.visualization.acc_maps_visualization import plot_bar_plot_from_df
 
+from all_tnn.analysis.config import Config
 
 def setup_analysis_directories_and_data_generators(
     saved_model_path,
@@ -57,13 +58,15 @@ def setup_analysis_directories_and_data_generators(
     Returns:
         tuple: A tuple containing updated hyperparameters and a dictionary of data generators.
     """
+    config = Config(base_path = '/share/klab/datasets/',   analysis_dir = "/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/")
+
     # Determine analysis subdirectory based on flags
-    analysis_subdir = 'analysis_prerelu' if PRE_RELU else 'analysis_postrelu'
-    analysis_subdir = 'analysis_postnorm' if POST_NORM else analysis_subdir
+    analysis_subdir = 'analysis_prerelu' if config.PRE_RELU else 'analysis_postrelu'
+    analysis_subdir = 'analysis_postnorm' if config.POST_NORM else analysis_subdir
 
     # Construct and create directories
     hparams['analysis_dir'] = os.path.join(
-        saved_model_path, f"{analysis_subdir}{ANALYSIS_DIR_SUFFIX}"
+        saved_model_path, f"{analysis_subdir}{config.ANALYSIS_DIR_SUFFIX}"
     )
     print(f"Saving results to {hparams['analysis_dir']}")
     os.makedirs(hparams['analysis_dir'], exist_ok=True)
@@ -73,10 +76,10 @@ def setup_analysis_directories_and_data_generators(
 
     # Build data generators
     data_generators_dict = {
-        'full_test': get_dataset(hparams, 'test', dataset_path=ECOSET_PATH),
-        'scenes_test': get_dataset(hparams, 'test', dataset_path=STF_PATH, dataset_subset='scenes'),
-        'tools_test': get_dataset(hparams, 'test', dataset_path=STF_PATH, dataset_subset='tools'),
-        'vgg_faces_test': get_dataset(hparams, 'test', dataset_path=STF_PATH, dataset_subset='faces'),
+        'full_test': get_dataset(hparams, 'test', dataset_path=config.ECOSET_PATH),
+        'scenes_test': get_dataset(hparams, 'test', dataset_path=config.STF_PATH, dataset_subset='scenes'),
+        'tools_test': get_dataset(hparams, 'test', dataset_path=config.STF_PATH, dataset_subset='tools'),
+        'vgg_faces_test': get_dataset(hparams, 'test', dataset_path=config.STF_PATH, dataset_subset='faces'),
     }
 
     # Acquire a dummy batch to determine data shapes
@@ -135,22 +138,24 @@ def analysis_multi_models():
     Sequentially run all implemented analyses (if enabled) for multiple models
     in one specific epoch (Comparison Benchmark).
     """
-    print(f"Running analysis for models: {MODEL_NAME_PATH_DICT.keys()}")
-    model_names = list(MODEL_NAME_PATH_DICT.keys())[:]  # MODELS[1:], skip 'Human'
-    saved_model_paths = [MODEL_NAME_PATH_DICT[mn] for mn in model_names]
+    config = Config(base_path = '/share/klab/datasets/',   analysis_dir = "/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/")
+    print(f"Running analysis for models: {config.MODEL_NAME_PATH_DICT.keys()}")
+
+    model_names = list(config.MODEL_NAME_PATH_DICT.keys())[:]  # MODELS[1:], skip 'Human'
+    saved_model_paths = [config.MODEL_NAME_PATH_DICT[mn] for mn in model_names]
 
     # Handle epochs to analyze
-    epochs_to_analyze = TEST_EPOCH
-    if isinstance(epochs_to_analyze, int) and not TRAVES_EPOCHS:
+    epochs_to_analyze = config.TEST_EPOCH
+    if isinstance(epochs_to_analyze, int) and not config.TRAVES_EPOCHS:
         checkpoints = [epochs_to_analyze]
     else:
-        checkpoints = TRAVES_EPOCHS
+        checkpoints = config.TRAVES_EPOCHS
 
     # ==============================
     # Neural-Level Analyses
     # ==============================
-    if ANALYSIS_ON_NEURAL_LEVEL:
-        for seed in SEEDS_RANGE:
+    if config.ANALYSIS_ON_NEURAL_LEVEL:
+        for seed in config.SEEDS_RANGE:
             for epoch in checkpoints:
                 
                 # nested dictionary to store all neural-level analyses
@@ -164,22 +169,22 @@ def analysis_multi_models():
                         saved_model_path = saved_model_path.replace('seed1', f'seed{seed}')
 
                     # Possibly override epoch if early stopping is enabled
-                    epoch = MODELS_EPOCHS_DICT[model_name][seed - 1] if EARLY_STOPPING_FLAG else epoch
+                    epoch = config.MODELS_EPOCHS_DICT[model_name][seed - 1] if config.EARLY_STOPPING_FLAG else epoch
                     print(f'Analyzing epoch {epoch} for model {model_name} in {saved_model_path}')
 
                     # Load hyperparameters
-                    hparams = load_and_override_hparams(saved_model_path, batch_size=BATCH_SIZE)
-                    hparams['dataset'] = ECOSET_PATH
+                    hparams = load_and_override_hparams(saved_model_path, batch_size=config.BATCH_SIZE)
+                    hparams['dataset'] = Econfig.COSET_PATH
                     hparams['num_classes'] = 565
 
                     # Load the model
-                    activities_model, model = load_models(epoch, hparams, saved_model_path, PRE_RELU, POST_NORM)
+                    activities_model, model = load_models(epoch, hparams, saved_model_path, config.PRE_RELU, config.POST_NORM)
 
                     # Set up analysis directories and data generators
                     hparams, data_generators_dict = setup_analysis_directories_and_data_generators(
                         saved_model_path, hparams, epoch,
-                        PRE_RELU, POST_NORM,
-                        ANALYSIS_DIR_SUFFIX, ECOSET_PATH, STF_PATH,
+                        config.PRE_RELU, config.POST_NORM,
+                        config.ANALYSIS_DIR_SUFFIX, config.ECOSET_PATH, config.STF_PATH,
                         activities_model
                     )
 
@@ -187,7 +192,7 @@ def analysis_multi_models():
 
 
                     # Figure 1B & 5A: Categorization performance
-                    if (CATEGORIZATION_PERFORMANCE and not ('simclr' in model_name.lower() and 'finetune' not in model_name.lower())):
+                    if (config.CATEGORIZATION_PERFORMANCE and not ('simclr' in model_name.lower() and 'finetune' not in model_name.lower())):
                        # Whether dataset labels need be renamed if not matching the model's output layer
                         if model.layers[-1]._name not in ['dense_2']:
                             dataset_label_renamer = DatasetLabelRenamer(model, default_label_key='dense_2')
@@ -205,23 +210,23 @@ def analysis_multi_models():
                     # Figure 2A & 2C & 5B: Orientation selectivity
                     if ORIENTATION_SELECTIVITY:
                         output = orientation_selectivity(
-                            activities_model, WAVELENGTHS, N_ANGLES, hparams,
-                            ENTROPY_SLIDING_WINDOW_SIZE, output_dict
+                            activities_model, config.WAVELENGTHS, config.N_ANGLES, hparams,
+                            config.ENTROPY_SLIDING_WINDOW_SIZE, output_dict
                         )
                         output_dict.update(output)
 
                     # Figure 2D & 5C: Category selectivity
-                    if CATEGORY_STATS:
+                    if config.CATEGORY_STATS:
                         output = compute_category_selectivities(
                             activities_model,
                             hparams,
                             data_generators_dict,
-                            SELECTIVITY_DATASETS,
+                            config.SELECTIVITY_DATASETS,
                         )
                         output_dict.update(output)
 
                     # Figure 3A & 5D/5E/5F: Energy efficiency
-                    if ENERGY_EFFICIENCY:
+                    if config.ENERGY_EFFICIENCY:
                         try:
                             feature_responses = load_feature_responses(hparams)
                         except:
@@ -229,8 +234,8 @@ def analysis_multi_models():
                                                                     data_generators_dict,
                                                                     dataset_names= ['full_test'],  # ['vgg_faces_test', 'full_test']
                                                                     hparams=hparams,
-                                                                    pre_relu = PRE_RELU,
-                                                                    post_norm = POST_NORM,
+                                                                    pre_relu = config.PRE_RELU,
+                                                                    post_norm = config.POST_NORM,
                                                                     )
                         analyze_energy_efficiency(
                             feature_responses,
@@ -238,8 +243,8 @@ def analysis_multi_models():
                             hparams,
                             all_l1_norm_data,
                             multi_models_neural_dict,
-                            PRE_RELU,
-                            POST_NORM,
+                            config.PRE_RELU,
+                            config.POST_NORM,
                             output_dict['grating_w_entropies'],
                             epoch=epoch
                         )
@@ -253,8 +258,8 @@ def analysis_multi_models():
                             hparams,
                             multi_models_neural_dict,
                             PRE_RELU,
-                            NORM_PREV_LAYER=NORM_PREV_LAYER,
-                            NORM_LAYER_OUT=NORM_LAYER_OUT
+                            NORM_PREV_LAYER=config.NORM_PREV_LAYER,
+                            NORM_LAYER_OUT=config.NORM_LAYER_OUT
                         )
 
                     # Visualizing model, computing spatial smoothness losses
@@ -268,7 +273,7 @@ def analysis_multi_models():
                     output_dict['mean_cosdist'] = spatial_losses
 
                     # Figure 1C & 5B: Spatial smoothness
-                    if SMOOTHNESS:
+                    if config.SMOOTHNESS:
                         output = smoothness_main(
                             output_dict,
                             epoch=epoch, 
@@ -281,7 +286,7 @@ def analysis_multi_models():
                     multi_models_neural_dict[model_name] = output_dict
 
                 # Save summarized analyses
-                if SUMMARY_of_NEURAL_LEVEL_ANALYSES:
+                if config.SUMMARY_of_NEURAL_LEVEL_ANALYSES:
                     save_all_neural_level_analyses_results(
                         NEURAL_LEVEL_RESULT_DIR,
                         epoch,
@@ -289,14 +294,14 @@ def analysis_multi_models():
                         model_names,
                         multi_models_neural_dict,
                         all_l1_norm_data,
-                        save_name_preffix=SAVE_NEURAL_RESULTS_DICT_NAME_PREFIX
+                        save_name_preffix=config.SAVE_NEURAL_RESULTS_DICT_NAME_PREFIX
                     )
 
     # ==============================
     # Behaviour-Level Analyses
     # ==============================
-    if ANALYSIS_ON_BEHAVIOUR_LEVEL:
-        MODELS = list(MODEL_NAME_PATH_DICT.keys())
+    if config.ANALYSIS_ON_BEHAVIOUR_LEVEL:
+        MODELS = list(config.MODEL_NAME_PATH_DICT.keys())
         if len(checkpoints) > 1:
             models_epochs = [[ep] * len(MODELS) for ep in checkpoints]
         else:
@@ -313,36 +318,36 @@ def analysis_multi_models():
             multi_models_behaviour_result_dict[epoch] = {}
             multi_models_across_epochs_behaviour_result_dict[epoch] = {}
 
-            for size_factor in SIZE_FACTORS:
+            for size_factor in config.SIZE_FACTORS:
                 multi_models_behaviour_result_dict[epoch][size_factor] = {}
                 multi_models_across_epochs_behaviour_result_dict[epoch][size_factor] = {}
 
-                for ALIGNMENT_MODE in ALIGNMENT_MODES:
-                    multi_models_behaviour_result_dict[epoch][size_factor][ALIGNMENT_MODE] = {}
-                    multi_models_across_epochs_behaviour_result_dict[epoch][size_factor][ALIGNMENT_MODE] = {}
+                for alignment_mode in config.ALIGNMENT_MODES:
+                    multi_models_behaviour_result_dict[epoch][size_factor][alignment_mode] = {}
+                    multi_models_across_epochs_behaviour_result_dict[epoch][size_factor][alignment_mode] = {}
 
-                    for MAP_NORM_MODE in MAP_NORM_MODES:
-                        multi_models_behaviour_result_dict[epoch][size_factor][ALIGNMENT_MODE][MAP_NORM_MODE] = {}
-                        multi_models_across_epochs_behaviour_result_dict[epoch][size_factor][ALIGNMENT_MODE][MAP_NORM_MODE] = {}
+                    for map_norm_mode in config.MAP_NORM_MODES:
+                        multi_models_behaviour_result_dict[epoch][size_factor][alignment_mode][map_norm_mode] = {}
+                        multi_models_across_epochs_behaviour_result_dict[epoch][size_factor][alignment_mode][map_norm_mode] = {}
 
                         save_path_suffix = (
-                            f"{this_epoch[1]}_{MAP_NORM_MODE}_{size_factor}_"
-                            f"{ALIGNMENT_MODE}_{ALIGNMENT_METRIC}_{RSA_METRIC}_{SEEDS_RANGE}"
+                            f"{this_epoch[1]}_{map_norm_mode}_{size_factor}_"
+                            f"{alignment_mode}_{config.ALIGNMENT_METRIC}_{config.RSA_METRIC}_{config.SEEDS_RANGE}"
                         )
 
-                        if GET_BEHAVIOURAL_DATA:
+                        if config.GET_BEHAVIOURAL_DATA:
                             behaviour_data = get_behaviour_data(
                                 model_names=MODELS[:],
                                 test_epochs=this_epoch[:],
-                                map_norm_mode=MAP_NORM_MODE,
-                                alphas=list(ALPHAS.values()), 
-                                seeds_list=SEEDS_RANGE,
-                                result_source_dir=BEHAVIOUR_RESULT_SOURCE_DIR,
+                                map_norm_mode=map_norm_mode,
+                                alphas=list(config.ALPHAS.values()), 
+                                seeds_list=config.SEEDS_RANGE,
+                                result_source_dir=config.BEHAVIOUR_RESULT_SOURCE_DIR,
                                 size_factor=size_factor,
-                                SUBJ_START=SUBJ_START,
-                                SUBJ_END=SUBJ_END,
+                                SUBJ_START=config.SUBJ_START,
+                                SUBJ_END=config.SUBJ_END,
                                 decimals=15,
-                                model_epoch_map = MODELS_EPOCHS_DICT,
+                                model_epoch_map = config.MODELS_EPOCHS_DICT,
                                 analysis_datasource_type='',
                             )
                             output_behaviour_dict = {'behaviour_data': behaviour_data}
@@ -350,9 +355,9 @@ def analysis_multi_models():
                         # --------------------------
                         # Figure 4E & 5G: Behavioural alignment
                         # --------------------------
-                        if BEHAVIOUR_ALIGNMENT:
-                            COLUMNS[1] = ALIGNMENT_METRIC
-                            behaviour_alignment_columns = COLUMNS + ["condition"]
+                        if config.BEHAVIOUR_ALIGNMENT:
+                            config.COLUMNS[1] = config.ALIGNMENT_METRIC
+                            behaviour_alignment_columns = config.COLUMNS + ["condition"]
 
                             df_behaviour_agreements, noise_ceiling, significance_dict = visual_behaviour_alignment_analysis(
                                 acc_maps_data=[
@@ -361,16 +366,16 @@ def analysis_multi_models():
                                     behaviour_data['seeds_model_data'].get(mn, [])
                                     for mn in MODELS[:]
                                 ],
-                                alignment_metric=ALIGNMENT_METRIC,
+                                alignment_metric=config.ALIGNMENT_METRIC,
                                 model_names=MODELS,
-                                comparison_modes=BEHAVIOUR_ANALYSIS_MODES,
+                                comparison_modes=config.BEHAVIOUR_ANALYSIS_MODES,
                                 columns=behaviour_alignment_columns,
                                 # seeds_list=SEEDS_RANGE,
-                                categories_num=CATEGORIES_NUM,
-                                map_norm_mode=MAP_NORM_MODE,
-                                sampling_num=SAMPLING_NUM,
-                                alignment_mode=ALIGNMENT_MODE,
-                                model_names_to_plot=MODEL_NAMES_TO_PLOT,
+                                categories_num=config.CATEGORIES_NUM,
+                                map_norm_mode=map_norm_mode,
+                                sampling_num=config.SAMPLING_NUM,
+                                alignment_mode = alignment_mode,
+                                model_names_to_plot=config.MODEL_NAMES_TO_PLOT,
                                 verbose=False,
                             )
 
@@ -378,21 +383,21 @@ def analysis_multi_models():
                                 significance_dict,
                                 roi_labels_to_plot=['Accuracy Maps Agreement'],
                                 model_names=MODELS[:],
-                                model_names_to_plot=MODEL_NAMES_TO_PLOT,
-                                save_dir=os.path.join(BEHAVIOUR_ANALYSIS_RESULT_DIR, f'ep_{save_path_suffix}'),
+                                model_names_to_plot=config.MODEL_NAMES_TO_PLOT,
+                                save_dir=os.path.join(config.BEHAVIOUR_ANALYSIS_RESULT_DIR, f'ep_{save_path_suffix}'),
                                 num_cols=1
                             )
 
-                            df_behaviour_agreements.to_csv(f"{BEHAVIOUR_ANALYSIS_RESULT_DIR}/df_behaviour_agreement.csv")
+                            df_behaviour_agreements.to_csv(f"{config.BEHAVIOUR_ANALYSIS_RESULT_DIR}/df_behaviour_agreement.csv")
 
                             # Noise ceiling line
                             hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if PLOT_NC else None
 
                             plot_bar_plot_from_df(
                                 df_behaviour_agreements,
-                                add_epoch_to_save_dir_name(BEHAVIOUR_AGREEMENT_ANALYSIS_PATH, save_path_suffix),
+                                add_epoch_to_save_dir_name(config.BEHAVIOUR_AGREEMENT_ANALYSIS_PATH, save_path_suffix),
                                 x="Model",
-                                y=ALIGNMENT_METRIC,
+                                y=config.ALIGNMENT_METRIC,
                                 title="Behaviour Agreement Analysis",
                                 show_plot=False,
                                 color3_start_id=1,
@@ -403,37 +408,37 @@ def analysis_multi_models():
                         # --------------------------
                         # Figure 4E & 5H: Behavioural ADM alignment
                         # --------------------------
-                        if BEHAVIOURAL_ADM_ALIGNMENT:
-                            COLUMNS[1] = RSA_METRIC
+                        if config.BEHAVIOURAL_ADM_ALIGNMENT:
+                            COLUMNS[1] = config.RSA_METRIC
                             df_adm_agreement, noise_ceiling, significance_dict, adm_dict = adm_alignment_analysis(
                                 raw_individuals_vs_seeds_model_acc_maps=[
                                     behaviour_data['raw_individual_participants_5x5_acc_maps_array']
                                 ] + [
                                     behaviour_data['seeds_model_data'].get(mn, [])
-                                    for mn in MODELS[:]
+                                    for mn in config.MODELS[:]
                                 ],
-                                model_names=MODELS,
-                                seeds_list=SEEDS_RANGE,
-                                comparison_modes=BEHAVIOUR_ANALYSIS_MODES,
-                                create_adm_metric=ADM_METRIC,
-                                rsa_metric=RSA_METRIC,
-                                columns=COLUMNS ,
-                                categories_num=CATEGORIES_NUM,
-                                map_norm_mode=MAP_NORM_MODE,
-                                sampling_num=SAMPLING_NUM,
-                                alignment_mode=ALIGNMENT_MODE,
-                                model_names_to_plot=MODEL_NAMES_TO_PLOT,
+                                model_names=config.MODELS,
+                                seeds_list=config.SEEDS_RANGE,
+                                comparison_modes=config.BEHAVIOUR_ANALYSIS_MODES,
+                                create_adm_metric=config.ADM_METRIC,
+                                rsa_metric=config.RSA_METRIC,
+                                columns=config.COLUMNS ,
+                                categories_num=config.CATEGORIES_NUM,
+                                map_norm_mode=config.MAP_NORM_MODE,
+                                sampling_num=config.SAMPLING_NUM,
+                                alignment_mode = alignment_mode,
+                                model_names_to_plot=config.MODEL_NAMES_TO_PLOT,
                                 verbose=False,
                             )
 
                             os.makedirs(
-                                os.path.join(BEHAVIOUR_ANALYSIS_RESULT_DIR, f'ep_{save_path_suffix}'),
+                                os.path.join(config.BEHAVIOUR_ANALYSIS_RESULT_DIR, f'ep_{save_path_suffix}'),
                                 exist_ok=True
                             )
                             adm_dict_file_path = os.path.join(
-                                BEHAVIOUR_ANALYSIS_RESULT_DIR,
+                                config.BEHAVIOUR_ANALYSIS_RESULT_DIR,
                                 f'ep_{save_path_suffix}',
-                                f'adm_dict_{this_epoch[1]}_{size_factor}_{ALIGNMENT_METRIC}_{RSA_METRIC}.h5'
+                                f'adm_dict_{this_epoch[1]}_{size_factor}_{config.ALIGNMENT_METRIC}_{config.RSA_METRIC}.h5'
                             )
                             with h5py.File(adm_dict_file_path, 'w') as hf:
                                 for k, v in adm_dict.items():
@@ -442,22 +447,22 @@ def analysis_multi_models():
                             plot_significance_matrix(
                                 significance_dict,
                                 roi_labels_to_plot=['ADM Agreement'],
-                                model_names=MODELS[:],
-                                model_names_to_plot=MODEL_NAMES_TO_PLOT,
-                                save_dir=os.path.join(BEHAVIOUR_ANALYSIS_RESULT_DIR, f'ep_{save_path_suffix}'),
+                                model_names=config.MODELS[:],
+                                model_names_to_plot=config.MODEL_NAMES_TO_PLOT,
+                                save_dir=os.path.join(config.BEHAVIOUR_ANALYSIS_RESULT_DIR, f'ep_{save_path_suffix}'),
                                 num_cols=1
                             )
 
-                            df_adm_agreement.to_csv(f"{BEHAVIOUR_ANALYSIS_RESULT_DIR}/df_adm_agreement.csv")
+                            df_adm_agreement.to_csv(f"{config.BEHAVIOUR_ANALYSIS_RESULT_DIR}/df_adm_agreement.csv")
 
                             # Noise ceiling line
                             hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if PLOT_NC else None
 
                             plot_bar_plot_from_df(
                                 df_adm_agreement,
-                                add_epoch_to_save_dir_name(ADM_AGREEMENT_ANALYSIS_PATH, save_path_suffix),
+                                add_epoch_to_save_dir_name(config.ADM_AGREEMENT_ANALYSIS_PATH, save_path_suffix),
                                 x="Model",
-                                y=RSA_METRIC,
+                                y=config.RSA_METRIC,
                                 title="Noise Ceiling Corrected ADM Agreement Analysis",
                                 show_plot=False,
                                 color3_start_id=1,

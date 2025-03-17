@@ -1,4 +1,4 @@
-
+import matplotlib.colors as mcolors
 class Colors(object):
 
     def __init__(self) -> None:
@@ -15,6 +15,11 @@ class Colors(object):
         import matplotlib as mpl
         oranges =[mpl.colormaps[theme_name](10*i+16) for i in range(16)] 
         return oranges
+
+# Function to apply alpha to a color
+def apply_alpha(color, alpha=0.5):
+    rgba = mcolors.to_rgba(color, alpha=alpha)
+    return rgba
 
 # Other colors from the COLOR_DICT you might want to include
 reds, pinks, purples, viridis, magma, jet = (
@@ -39,6 +44,11 @@ oranges, blues, greys, greens, greenblues, redpurples, yellows= (
 
 # color themes
 COLOR_THEME_WITH_ALPHA_SWEEP = [oranges[-2], greys[-2], greenblues[-9], greenblues[-7], greenblues[-5], greenblues[-2], yellows[-10], greys[-5], redpurples[-5], redpurples[-2], ]
+# COLOR_THEME_WITH_ALPHA_SWEEP_LIGHER =  [oranges[-5], greys[-5], greenblues[-12], greenblues[-10], greenblues[-8], greenblues[-5], yellows[-13], greys[-8], redpurples[-8], redpurples[-5], ]
+COLOR_THEME_WITH_ALPHA_SWEEP_LIGHER =  [oranges[0], greys[0], greenblues[0], greenblues[2], greenblues[4], greenblues[7], yellows[0], greys[3], redpurples[0], redpurples[0] ]
+# COLOR_THEME_WITH_ALPHA_50 = [apply_alpha(color, alpha=0.5) for color in COLOR_THEME_WITH_ALPHA_SWEEP]
+# COLOR_THEME_WITH_ALPHA_30 = [apply_alpha(color, alpha=0.3) for color in COLOR_THEME_WITH_ALPHA_SWEEP]
+
 LIGHT_3COLORS = ['lightgreen','lightblue','lightgrey']
 DECREASING_6COLORS = [reds[-2], oranges[-2],  blues[-2], greens[-2], greys[-2]]
 

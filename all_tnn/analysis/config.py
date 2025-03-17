@@ -53,8 +53,8 @@ class Config:
             "TNN_alpha_1": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha1.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
             "TNN_alpha_10": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
             "TNN_alpha_100": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha100.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
-            "shifted_TNN_alpha_10": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks",
-            "TNN_simclr_finetune": "finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
+            # "TNN_simclr_finetune": "finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
+            # "shifted_TNN_alpha_10": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks",
         }
         self.MODEL_NAMES = list(self.MODEL_NAME_PATH_DICT.keys())[1:]
 
@@ -82,9 +82,9 @@ class Config:
             "TNN_alpha_1": 1.0,
             "TNN_alpha_10": 10.0,
             "TNN_alpha_100": 100.0,
-            "shifted_TNN_alpha_10": 10.0,
             "TNN_simclr": 10.0,
             "TNN_simclr_finetune": 10.0,
+            "shifted_TNN_alpha_10": 10.0,
         }
 
         self.MODEL_NAMES_TO_PLOT = {
@@ -100,7 +100,7 @@ class Config:
         # -------------------------------------------------------------------
         # ---------------  Neural-level analysis toggles  -------------------
         # -------------------------------------------------------------------
-        self.ANALYSIS_ON_NEURAL_LEVEL = [False, True][1]
+        self.ANALYSIS_ON_NEURAL_LEVEL = [False, True][0]
         self.SAVE_NEURAL_RESULTS_DICT_NAME_PREFIX = ["", "debug", "all_"][-1]
         self.SUMMARY_of_NEURAL_LEVEL_ANALYSES = [False, True][
             1
@@ -143,7 +143,7 @@ class Config:
         # -------------------------------------------------------------------
         # ---------------  Behaviour-level analysis toggles  ----------------
         # -------------------------------------------------------------------
-        self.ANALYSIS_ON_BEHAVIOUR_LEVEL = [False, True][0]
+        self.ANALYSIS_ON_BEHAVIOUR_LEVEL = [False, True][1]
         self.PLOT_NC = False
         self.GET_BEHAVIOURAL_DATA = [False, True][1]
         self.BEHAVIOUR_ALIGNMENT = [False, True][1]

@@ -1,3 +1,5 @@
+
+
 import os
 import numpy as np
 import pandas as pd
@@ -7,102 +9,235 @@ import matplotlib.patches as mpatches  # Ensure this is imported
 import scipy.stats as stats
 from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib as mpl
+from matplotlib.colors import to_rgba
 
 # Setting color style
-from all_tnn.analysis.visualization.colors import COLOR_THEME, COLOR_THEME_WITH_ALPHA_SWEEP
+from all_tnn.analysis.visualization.colors import COLOR_THEME, COLOR_THEME_WITH_ALPHA_SWEEP, COLOR_THEME_WITH_ALPHA_SWEEP
 import scienceplots
 plt.style.use([ 'nature','science',"ieee",'no-latex'])
 
 color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:]
 
-def add_significance(ax, data, col_name, significance_dict):
-    # Add significance if provided
-    if significance_dict:
-        y_max = data[col_name].max()
-        y_offset = y_max * 0.1  # offset for annotation in relation to the highest bar
-        for comp in significance_dict.keys():
-            # comp should be a tuple of the form: (bar1, bar2, height, asterisks)
-            bar1, bar2, height, asterisks = comp
-            x1, x2 = bar1, bar2
 
-            #* If plotting asterisks above line
-            # ax.plot([x1, x1, x2, x2], [height+y_offset, height+y_offset*1.05, height+y_offset*1.05, height+y_offset], lw=0.5, c='black')
-            # ax.text((x1+x2)*0.5, height+y_offset*1.1, asterisks, ha='center', va='bottom', color='black')
-            # Calculate the middle position for the asterisk and the line break
-            mid_point = (x1 + x2) / 2
-            asterisk_width = 0.25 # # Determine the space to leave for the asterisk * (x2 - x1)  # 10% of the bar width
-            
-            if asterisks != '':
-                # Draw the first line segment (left)
-                ax.plot([x1, x1, mid_point - asterisk_width], 
-                        [height + y_offset, height + y_offset * 1.05, height + y_offset * 1.05], 
-                        lw=0.5, c='black', linestyle='-')
-                # Draw the second line segment (right), set line width to 0.5
-                ax.plot([mid_point + asterisk_width, x2, x2], 
-                        [height + y_offset * 1.05, height + y_offset * 1.05, height + y_offset], 
-                        lw=0.5, c='black', linestyle='-')
-                # Add asterisks in the middle of the line break
-                ax.text(mid_point, height + y_offset * 1.05, asterisks, 
-                        ha='center', va='center', color='black', fontsize=12, fontweight='bold') 
-            
-            # If asterisks are empty, plot a continuous line across
-            else:
-                # Draw a continuous line without breaks
-                ax.plot([x1, x2], 
-                        [height + y_offset, height + y_offset], 
-                        lw=0.5, c='black', linestyle='-')
+def barplot(
+    save_path=None,
+    title=None,
+    color3_start_id=0,
+    figsize=(6, 4),
+    x=None,
+    y=None,
+    hue=None,
+    data=None,
+    # ----------------
+    show_barplot=True, 
+    bar_width=0.6,
+    bar_alpha=0.4,
+    error_bar_width=2,
+    # ----------------
+    show_boxplot=False,
+    box_width=0.4,
+    box_linewidth=1.5,
+    box_alpha=0.4,
+    box_whis=(5, 95),
+    # ----------------
+    point_plot=None,            # "strip", "swarm", or None
+    point_plot_kwargs=None,
+    log_scale=False,
+    hline=None,
+    significance_dict=None,
+):
+    """
+    Create a more elegant “hybrid” plot with optional bars + boxplots
+    on the same Axes.  By default:
+      - Each bar is semi‐transparent.
+      - Each box’s outline matches the bar color for that group,
+        also partially transparent.
+      - Optionally overlay strip/swarm points in a light color.
 
+    Parameters
+    ----------
+    show_barplot : bool
+        Whether to draw the barplot (mean + confidence intervals).
+    bar_width : float
+        Width of each bar (Seaborn default ~0.8).
+    bar_alpha : float
+        Transparency for bar faces.
+    show_boxplot : bool
+        Whether to overlay a box‐and‐whisker plot for each category.
+    box_width : float
+        Width of each box (often smaller than bar_width).
+    box_linewidth : float
+        Thickness of box edges, whiskers, caps, etc.
+    box_alpha : float
+        Transparency for the box face.
+    box_whis : tuple or float
+        Whisker range for boxplot, e.g. (5, 95) or 1.5 for 1.5×IQR.
+    point_plot : str or None
+        If "strip" or "swarm", overlay raw data points in gray.
+    point_plot_kwargs : dict or None
+        Extra kwargs for sns.stripplot() or sns.swarmplot().
+    """
 
-def barplot(save_path=None, title=None, color3_start_id=0, figsize=(10, 6),hline=None, significance_dict=None, log_scale=False, *args, **kwargs):
-    with plt.style.context(['nature', 'science', "ieee", 'no-latex']):
-        # Make sure to use sans-serif fonts
-        fm = mpl.font_manager
-        fm._get_fontconfig_fonts.cache_clear()
+    with plt.style.context(['nature', 'science', 'ieee', 'no-latex']):
+        # Use sans-serif fonts
+        mpl.font_manager._get_fontconfig_fonts.cache_clear()
         plt.rcParams['font.family'] = 'sans-serif'
 
+        # Fetch your color palette
+        cocclor_platte = COLOR_THEME_WITH_ALPHA_SWEEP[color3_start_id:]
+
         fig, ax = plt.subplots(figsize=figsize)
-        sns.barplot(palette=COLOR_THEME_WITH_ALPHA_SWEEP[color3_start_id:], *args, **kwargs)
-        ax.tick_params(right=False, top=False)
-        ax.tick_params(right=False, which='minor', top=False)
-        # ax.legend(title=None)
-        ax.set(title=title)
+       
+
+        # 1) Optional barplot
+        # --------------------------------------------------
+        if show_barplot:
+            sns.barplot(
+                x=x,
+                y=y,
+                hue=hue,
+                data=data,
+                palette=cocclor_platte,
+                edgecolor='none',
+                linewidth=0,
+                width=bar_width,
+                capsize=0,
+                dodge=bool(hue),
+                ax=ax
+
+            )
+            # Style the bars
+            for i, patch in enumerate(ax.patches):
+                c = cocclor_platte[i % len(cocclor_platte)]
+                patch.set_facecolor(to_rgba(c, alpha=bar_alpha))
+                patch.set_edgecolor(c)
+                patch.set_linewidth(1.0)
+
+            # Thicken & color-match the error-bar lines
+            for i, line in enumerate(ax.lines):
+                line.set_linewidth(error_bar_width)
+                c = cocclor_platte[(i // 3) % len(cocclor_platte)]
+                line.set_color(c)
+            
+        # --------------------------------------------------
+        # 2) Optional boxplot
+        # --------------------------------------------------
+        if show_boxplot:
+            gray_alpha = to_rgba('gray', alpha=0.4)
+
+            boxplot_obj = sns.boxplot(
+                x=x, 
+                y=y,
+                hue=hue,
+                data=data,
+                palette=["white"] * len(cocclor_platte),  # white boxes initially
+                width=box_width,
+                whis=box_whis,
+                showfliers=False,
+                dodge=bool(hue),
+                boxprops=dict(edgecolor=gray_alpha, facecolor='none', linewidth=box_linewidth),
+                whiskerprops=dict(color=gray_alpha, linewidth=box_linewidth),
+                capprops=dict(color=gray_alpha, linewidth=box_linewidth),
+                medianprops=dict(color=gray_alpha, linewidth=box_linewidth),
+                ax=ax,
+                zorder=3
+            )
+
+
+        # --------------------------------------------------
+        # 3) Optional overlay of data points (strip/swarm)
+        # --------------------------------------------------
+        if point_plot in ['strip', 'swarm']:
+            if point_plot_kwargs is None:
+                point_plot_kwargs = {}
+            default_point_kwargs = dict(color='gray', alpha=0.8, dodge=bool(hue))
+            default_point_kwargs.update(point_plot_kwargs)
+
+            if point_plot == 'strip':
+                sns.stripplot(x=x, y=y, hue=hue, data=data, ax=ax, **default_point_kwargs)
+            elif point_plot == 'swarm':
+                sns.swarmplot(x=x, y=y, hue=hue, data=data, ax=ax, **default_point_kwargs)
+
+        # --------------------------------------------------
+        # 4) Log scale, etc.
+        # --------------------------------------------------
         if log_scale:
             ax.set_yscale('log')
 
-        # Set x-tick labels to have a 45 degree rotation and set error bar style to solid line
-        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
-        for line in ax.lines:  # Iterate through the error bar lines
-            line.set_linestyle('-')  # Set the line style to solid
-            line.set_linewidth(0.5) # Set the error bar thickness to 1pt
-
-        # Adding a horizontal line if 'hline' parameter is specified
         if hline is not None:
-            plt.axhline(y=hline['value'], color=hline['color'], linestyle=hline['linestyle'], linewidth=hline['linewidth'])
+            plt.axhline(y=hline['value'],
+                        color=hline['color'],
+                        linestyle=hline['linestyle'],
+                        linewidth=hline['linewidth'])
 
-        # Adding significance annotations if provided
+        # --------------------------------------------------
+        # 5) Significance annotations
+        # --------------------------------------------------
         if significance_dict:
-            add_significance(ax, kwargs.get('data'), kwargs.get('y'), significance_dict)
+            add_significance(ax, data, y, significance_dict)
 
-        sns.despine()
+        # --------------------------------------------------
+        # 6) Aesthetics
+        # --------------------------------------------------
+        ax.set(title=title)
+        ax.tick_params(right=False, top=False, bottom=False, which='both')
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+
+        sns.despine(ax=ax)
+        # ax.margins(x=0.1)   # <--- Adds spacing on the left/right so bars aren’t touching y-axis
+
+        # Proper manual margin adjustment for categorical axes
+        margin = 0.6
+        ax.set_xlim(ax.get_xlim()[0] - margin, ax.get_xlim()[1] + margin)
+        
+
+        # --------------------------------------------------
+        # 7) Save figure if desired
+        # --------------------------------------------------
         if save_path:
             dir_path = os.path.dirname(save_path)
-            os.mkdir(dir_path) if not os.path.exists(dir_path) else None
-            plt.savefig(f'{save_path}.jpg', dpi=200)
-    return ax
+            if dir_path and not os.path.exists(dir_path):
+                os.makedirs(dir_path, exist_ok=True)
+            plt.savefig(save_path, dpi=200, transparent=True)
 
-def plot_bar_plot_from_df(df_accuracy_ratios, path, x="Model", y="Effect", hue=None, title="Mean Accuracy Ratio Comparison", show_plot=True, color3_start_id=0, figsize=(10, 6), hline=None, significance_dict=None,log_scale=False):
-    
-    with plt.style.context(['nature', 'science', "ieee", 'no-latex']):
-        if hue:
-            ax = barplot(color3_start_id=color3_start_id, figsize=figsize, title=title, x=x, y=y, hue=hue, data=df_accuracy_ratios, edgecolor="black", linewidth=.8,  hline=hline, significance_dict=significance_dict, log_scale=log_scale)
-        else:
-            ax = barplot(color3_start_id=color3_start_id, figsize=figsize, title=title, x=x, y=y, data=df_accuracy_ratios, edgecolor="black", linewidth=.8,  hline=hline, significance_dict=significance_dict, log_scale=log_scale)
-        
+        return ax
+
+###############################################################################
+# Example usage
+###############################################################################
+def plot_bar_plot_from_df(df,
+                        path,
+                        x="Model",
+                        y="spearmanr",
+                        hue=None,
+                        title="Models Comparison",
+                        show_plot=True,
+                        color3_start_id=0,
+                        figsize=(6, 4),
+                        **kwargs):
+    """
+    A thin wrapper that calls barplot(...) with data from a DataFrame,
+    then optionally saves and/or shows the figure.
+    """
+    with plt.style.context(['nature', 'science', 'ieee', 'no-latex']):
+        ax = barplot(
+            save_path=None,
+            title=title,
+            color3_start_id=color3_start_id,
+            figsize=figsize,
+            x=x,
+            y=y,
+            hue=hue,
+            data=df,
+            **kwargs
+        )
+
         if path:
             dir_path = os.path.dirname(path)
             os.makedirs(dir_path, exist_ok=True)
-            plt.savefig(path, dpi=200)
+            plt.savefig(path, dpi=200, transparent=True)
             print(f"Saved plot to {path}")
+
         if show_plot:
             plt.show()
         else:
@@ -574,3 +709,80 @@ def plot_and_save_confusion_matrix(conf_matrix, categories, acc_maps_save_dir, m
     # Save the plot as an image file
     plt.savefig(f"{acc_maps_save_dir}confusion_matrix_{model_name}_{data_id}_model_id_{seed}_ep{epoch}.pdf", dpi=300)
     plt.close(fig) 
+
+
+
+def add_significance(ax, data, col_name, significance_dict):
+    # Add significance if provided
+    if significance_dict:
+        y_max = data[col_name].max()
+        y_offset = y_max * 0.1  # offset for annotation in relation to the highest bar
+        for comp in significance_dict.keys():
+            # comp should be a tuple of the form: (bar1, bar2, height, asterisks)
+            bar1, bar2, height, asterisks = comp
+            x1, x2 = bar1, bar2
+
+            #* If plotting asterisks above line
+            # ax.plot([x1, x1, x2, x2], [height+y_offset, height+y_offset*1.05, height+y_offset*1.05, height+y_offset], lw=0.5, c='black')
+            # ax.text((x1+x2)*0.5, height+y_offset*1.1, asterisks, ha='center', va='bottom', color='black')
+            # Calculate the middle position for the asterisk and the line break
+            mid_point = (x1 + x2) / 2
+            asterisk_width = 0.25 # # Determine the space to leave for the asterisk * (x2 - x1)  # 10% of the bar width
+            
+            if asterisks != '':
+                # Draw the first line segment (left)
+                ax.plot([x1, x1, mid_point - asterisk_width], 
+                        [height + y_offset, height + y_offset * 1.05, height + y_offset * 1.05], 
+                        lw=0.5, c='black', linestyle='-')
+                # Draw the second line segment (right), set line width to 0.5
+                ax.plot([mid_point + asterisk_width, x2, x2], 
+                        [height + y_offset * 1.05, height + y_offset * 1.05, height + y_offset], 
+                        lw=0.5, c='black', linestyle='-')
+                # Add asterisks in the middle of the line break
+                ax.text(mid_point, height + y_offset * 1.05, asterisks, 
+                        ha='center', va='center', color='black', fontsize=12, fontweight='bold') 
+            
+            # If asterisks are empty, plot a continuous line across
+            else:
+                # Draw a continuous line without breaks
+                ax.plot([x1, x2], 
+                        [height + y_offset, height + y_offset], 
+                        lw=0.5, c='black', linestyle='-')
+
+
+def add_significance(ax, data, col_name, significance_dict):
+    # Add significance if provided
+    if significance_dict:
+        y_max = data[col_name].max()
+        y_offset = y_max * 0.1  # offset for annotation in relation to the highest bar
+        for comp in significance_dict.keys():
+            # comp should be a tuple of the form: (bar1, bar2, height, asterisks)
+            bar1, bar2, height, asterisks = comp
+            x1, x2 = bar1, bar2
+
+            #* If plotting asterisks above line
+            # ax.plot([x1, x1, x2, x2], [height+y_offset, height+y_offset*1.05, height+y_offset*1.05, height+y_offset], lw=0.5, c='black')
+            # ax.text((x1+x2)*0.5, height+y_offset*1.1, asterisks, ha='center', va='bottom', color='black')
+            # Calculate the middle position for the asterisk and the line break
+            mid_point = (x1 + x2) / 2
+            asterisk_width = 0.25 # # Determine the space to leave for the asterisk * (x2 - x1)  # 10% of the bar width
+            
+            if asterisks != '':
+                # Draw the first line segment (left)
+                ax.plot([x1, x1, mid_point - asterisk_width], 
+                        [height + y_offset, height + y_offset * 1.05, height + y_offset * 1.05], 
+                        lw=0.5, c='black', linestyle='-')
+                # Draw the second line segment (right), set line width to 0.5
+                ax.plot([mid_point + asterisk_width, x2, x2], 
+                        [height + y_offset * 1.05, height + y_offset * 1.05, height + y_offset], 
+                        lw=0.5, c='black', linestyle='-')
+                # Add asterisks in the middle of the line break
+                ax.text(mid_point, height + y_offset * 1.05, asterisks, 
+                        ha='center', va='center', color='black', fontsize=12, fontweight='bold') 
+            
+            # If asterisks are empty, plot a continuous line across
+            else:
+                # Draw a continuous line without breaks
+                ax.plot([x1, x2], 
+                        [height + y_offset, height + y_offset], 
+                        lw=0.5, c='black', linestyle='-')
