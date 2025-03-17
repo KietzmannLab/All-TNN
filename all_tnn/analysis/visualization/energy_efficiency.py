@@ -9,16 +9,16 @@ from tqdm import tqdm
 from all_tnn.analysis.visualization.smoothness_entropy_visualization import get_radial_profile
 
 # Set plotting style
-import scienceplots  
+import scienceplots
 plt.style.use(['science', 'nature', "ieee", 'no-latex'])
 from .colors import COLOR_THEME_WITH_ALPHA_SWEEP
-color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:] 
+color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:]
 
-def preload_energy_maps(model_name_path_dict, 
-                        fixed_epochs, 
-                        seed_range, 
-                        pre_or_postrelu, 
-                        NORM_PREV_LAYER, 
+def preload_energy_maps(model_name_path_dict,
+                        fixed_epochs,
+                        seed_range,
+                        pre_or_postrelu,
+                        NORM_PREV_LAYER,
                         NORM_LAYER_OUT,
                         max_layer=6):
     """
@@ -30,7 +30,7 @@ def preload_energy_maps(model_name_path_dict,
         for epoch in fixed_epochs:
             for seed in seed_range:
                 for layer in range(1, max_layer):
-                    # Possibly disable in-loop modifications of NORM_LAYER_OUT 
+                    # Possibly disable in-loop modifications of NORM_LAYER_OUT
                     # or handle them beforehand if 'simclr' appears in model_name.
                     if 'shift' in model_name.lower():
                         continue
@@ -48,32 +48,32 @@ def preload_energy_maps(model_name_path_dict,
                         f"_NORM_PREV_LAYER_{NORM_PREV_LAYER}{suffix}.npy"
                     )
                     file_path = os.path.join(
-                        base_path.replace('seed1', f'seed{seed}'), 
-                        f'analysis_{pre_or_postrelu}/energy_efficiency/ep{epoch}/', 
+                        base_path.replace('seed1', f'seed{seed}'),
+                        f'analysis_{pre_or_postrelu}/energy_efficiency/ep{epoch}/',
                         filename
                     )
                     # Load data once
                     energy_data[(model_name, epoch, seed, layer)] = np.load(file_path)
-    
+
     return energy_data
 
 
 def plot_energy_consumption_across_epochs_lineplot(
-    model_name_path_dict, 
-    alphas, 
+    model_name_path_dict,
+    alphas,
     fixed_epochs,
-    save_fig_path=None, 
-    pre_or_postrelu='prerelu', 
-    prefix_list=['', 'ali_'], 
-    energy_consumption_types=['total', 'sum'], 
-    seed_range=range(1, 6), 
-    models_epochs_dict=None, 
-    NORM_PREV_LAYER=True, 
+    save_fig_path=None,
+    pre_or_postrelu='prerelu',
+    prefix_list=['', 'ali_'],
+    energy_consumption_types=['total', 'sum'],
+    seed_range=range(1, 6),
+    models_epochs_dict=None,
+    NORM_PREV_LAYER=True,
     NORM_LAYER_OUT=True,
     show_plot=False,
 ):
     plt.rcParams['font.family'] = 'sans-serif'
-    
+
     # Pre-load everything to avoid repeated I/O
     max_layer = 6  # only have layers 0..5
     all_energy_data = preload_energy_maps(
@@ -85,16 +85,13 @@ def plot_energy_consumption_across_epochs_lineplot(
         NORM_LAYER_OUT,
         max_layer=max_layer,
     )
-    
+
     # Prepare figure
     fig, ax = plt.subplots(figsize=(3.54, 2))
-    
+
     model_data = defaultdict(lambda: defaultdict(tuple))  # to store (mean, ci)
     seeds_model_data = defaultdict(lambda: defaultdict(list))
-    
-    # If you really want a color palette
-    color_palette = plt.cm.viridis(np.linspace(0, 1, len(model_name_path_dict)))
-    
+
     # Now compute sums from the pre-loaded data
     for model_idx, (model_name, _) in enumerate(model_name_path_dict.items()):
         if 'finetune' in model_name.lower(): #* finetune and non-finetune models are the same in representation level
@@ -110,45 +107,45 @@ def plot_energy_consumption_across_epochs_lineplot(
                     energy_map = all_energy_data[(model_name, epoch, seed, layer)]
                     total_energy += np.sum(np.abs(energy_map))
                 epoch_energy.append(total_energy)
-            
+
             # Calculate statistics
             means = np.mean(epoch_energy)
             std_err = np.std(epoch_energy, ddof=1) / np.sqrt(len(epoch_energy))
             ci = stats.t.ppf(0.975, len(epoch_energy)-1) * std_err
-            
+
             model_data[model_name][epoch] = (means, ci)
             seeds_model_data[model_name][epoch] = epoch_energy
-    
+
     # Plotting
     for model_idx, (model_name, epochs_data) in enumerate(model_data.items()):
         epochs = sorted(epochs_data.keys())
         means, cis = zip(*[epochs_data[e] for e in epochs])
         ax.errorbar(
-            epochs, 
-            means, 
-            yerr=cis, 
-            label=model_name, 
-            marker='o', 
-            linestyle='-', 
+            epochs,
+            means,
+            yerr=cis,
+            label=model_name,
+            marker='o',
+            linestyle='-',
             color=color_palette[model_idx]
         )
-    
+
     ax.set_yscale('log')
     ax.set_xlim(left=0, right=max(fixed_epochs) + 5)
     ax.set_xlabel('Epochs')
     ax.set_ylabel('Total Energy Consumption')
-    ax.set_title("Total Energy Consumption in Ali' Way across Epochs")
+    ax.set_title("Total Energy Consumption across Epochs")
     ax.set_xticks(fixed_epochs)
     ax.set_xticklabels([str(epoch) for epoch in fixed_epochs])
     ax.tick_params(which='both', top=False, right=False)  # Disable top and right ticks #  bottom=False,
     ax.legend()
     sns.despine()  # Remove top and right spines
-    
+
     if save_fig_path:
         plt.savefig(os.path.join(save_fig_path, 'energy_consumption_across_epochs_line.pdf'), dpi=300)
         plt.close()
     if show_plot: plt.show()
-    else: plt.close() 
+    else: plt.close()
 
 
 def plot_stacked_energy_map_energy_vs_eccentricity(model_name_path_dict, alphas, save_fig_path=None, pre_or_postrelu='prerelu', prefix_list=['', 'ali_'], energy_consumption_types=['total', 'sum'], seed_range=range(1, 6), models_epochs_dict=None, NORM_PREV_LAYER=True,NORM_LAYER_OUT=False, show_plot=False):
@@ -166,14 +163,14 @@ def plot_stacked_energy_map_energy_vs_eccentricity(model_name_path_dict, alphas,
             alpha = alphas[model_name]
             for seed in seed_range:
                 epoch = models_epochs_dict[model_name][seed-1]
-                file_path = os.path.join(base_path.replace('seed1', f'seed{seed}'), f'analysis_{pre_or_postrelu}/energy_efficiency/ep{epoch}/', 
+                file_path = os.path.join(base_path.replace('seed1', f'seed{seed}'), f'analysis_{pre_or_postrelu}/energy_efficiency/ep{epoch}/',
                                             f"{prefix}5layers_NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}_{model_name}_alpha{alpha}_drop0.0_pre_relu_{True if pre_or_postrelu=='prerelu' else False}_stacked_total_energy_map.npy")
                 stacked_energy_map = np.load(file_path)
 
                 # Get the radial profile
                 center = np.array(stacked_energy_map.shape) / 2
                 rad_energy_dict[model_name][seed] = get_radial_profile(stacked_energy_map, center)
-            
+
 
         cmap = COLOR_THEME_WITH_ALPHA_SWEEP[1:]
         plot_radial_energy(rad_energy_dict, cmap, list(model_name_path_dict.keys()), list(model_name_path_dict.keys()), save_fig_path, show_plot=show_plot)
@@ -208,9 +205,9 @@ def plot_radial_energy(rad_energy_dict, cmap, model_names, legend_names, save_di
     ax.set_ylabel('Relative Energy Consumption [%]')
     ax.set_ylim([0, 120])  # Set y-axis from 100% to 0%
     ax.set_xlim([0, 200])  # Set x-axis from 0 to 20
-    ax.tick_params(which='both', top=False, right=False)  
+    ax.tick_params(which='both', top=False, right=False)
     ax.legend()
-    sns.despine(trim=True, left=False)  
+    sns.despine(trim=True, left=False)
     os.makedirs(save_dir, exist_ok=True)
     print(os.path.join(save_dir, 'radial_energy_profile.pdf'))
     plt.savefig(os.path.join(save_dir, 'radial_energy_profile.pdf'), dpi=300)
@@ -235,7 +232,7 @@ def plot_stacked_energy_maps_normalized(model_name_path_dict, alphas, save_fig_p
             for model_name, base_path in model_name_path_dict.items():
                 alpha = alphas[model_name]
                 epoch = models_epochs_dict[model_name][seed - 1]
-                
+
                 # Shift models have only one seed
                 if 'shift' in model_name.lower() and seed > 1:
                     continue
@@ -256,11 +253,11 @@ def plot_stacked_energy_maps_normalized(model_name_path_dict, alphas, save_fig_p
                         )
                     # Load the energy map
                     stacked_energy_map = np.load(file_path)
-                    
-                    
+
+
                 else:
                     # import pdb; pdb.set_trace()
-                    cnn_file_paths = [os.path.join(base_path.replace('seed1', f'seed{seed}'), f'analysis_{pre_or_postrelu}/energy_efficiency/ep{epoch}/', 
+                    cnn_file_paths = [os.path.join(base_path.replace('seed1', f'seed{seed}'), f'analysis_{pre_or_postrelu}/energy_efficiency/ep{epoch}/',
                                             f"ali_way_overall_sum_energy_consumption_layer{layer_i}_NORM_LAYER_OUT_{NORM_LAYER_OUT}_NORM_PREV_LAYER_{NORM_PREV_LAYER}.npy") for layer_i in range(1, 6)]
                     # import pdb; pdb.set_trace()
                     acc_energy_maps = [np.mean(np.load(file_path),axis=-1) for file_path in cnn_file_paths] #* (48, 48, 64)  to (48, 48) for CNN, not to sheet to keep the spatial info
@@ -279,11 +276,11 @@ def plot_stacked_energy_maps_normalized(model_name_path_dict, alphas, save_fig_p
                 ax.set_title(f"{model_name}", fontsize=10)
                 # ax.set_xlabel('Layers', fontsize=8)
                 # ax.set_ylabel('Channels', fontsize=8)
-                
+
                 # Remove x and y ticks
                 ax.set_xticks([])
                 ax.set_yticks([])
-                
+
                 plot_index += 1
 
         # Adjust layout and save/show the figure
@@ -292,7 +289,7 @@ def plot_stacked_energy_maps_normalized(model_name_path_dict, alphas, save_fig_p
             file_name = os.path.join(save_fig_path, f'Seed_{seed}_with_ori_cnn_energy_maps.pdf')
             plt.savefig(file_name)
             print(f"Saved to {file_name}")
-        
+
         if show_plot: plt.show()
         else: plt.close()
 

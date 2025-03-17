@@ -25,6 +25,8 @@ install_requires = [
 
 setup(
     name="all_tnn",
+    author="Kietzmann Lab",
     packages=find_packages(),
     install_requires=install_requires,
+    version=version["__version__"],
 )

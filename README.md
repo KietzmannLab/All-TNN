@@ -27,7 +27,7 @@ This repository, available at [KietzmannLab/All-TNN](https://github.com/Kietzman
 
 - Python >= 3.8
 - TensorFlow 2.12
-- Additional Python libraries as specified in `requirements.txt`
+- Additional Python libraries as specified in `setup.py`
 
 ### Installation
 
