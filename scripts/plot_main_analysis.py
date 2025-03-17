@@ -115,87 +115,87 @@ plot_bar_plot_from_df(
 ############################################################################################################
 # Loading in pickle way / can also load in H5 way
 
-# # Orientation selectivity maps, entropy of first layer orientation selectivity, and category selectivity maps.
-# seed = 1
-# model_name = "TNN_alpha_10" # or pick another model
-# datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/seed{seed}/'
-# with open(datapath + 'all_multi_models_neural_dict.pickle', 'rb') as handle:
-#     def nested_dict(): return defaultdict(nested_dict)
-#     model_results_dict = pickle.load(handle)
-# vis = visualize_layer(model_results_dict["TNN_alpha_10"], 300, layer_i=0, analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
+# Orientation selectivity maps, entropy of first layer orientation selectivity, and category selectivity maps.
+seed = 1
+model_name = "TNN_alpha_10" # or pick another model
+datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/seed{seed}/'
+with open(datapath + 'all_multi_models_neural_dict.pickle', 'rb') as handle:
+    def nested_dict(): return defaultdict(nested_dict)
+    model_results_dict = pickle.load(handle)
+vis = visualize_layer(model_results_dict["TNN_alpha_10"], 300, layer_i=0, analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
 
-# # Radial entropy profile
-# all_data = []
-# datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/'
-# for seed in config.SEEDS_RANGE:: 
-#     with open(os.path.join(datapath, f'seed{seed}/all_multi_models_neural_dict.pickle'), 'rb') as handle: 
-#         def nested_dict(): return defaultdict(nested_dict)
-#         all_data.append(pickle.load(handle))
-# ent_dict = calculate_radial_entropy(all_data, config.MODEL_NAMES)
-# plot_radial_entropy(ent_dict, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
+# Radial entropy profile
+all_data = []
+datapath = f'/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/neural_level_src/neural_level_analysis/'
+for seed in config.SEEDS_RANGE:: 
+    with open(os.path.join(datapath, f'seed{seed}/all_multi_models_neural_dict.pickle'), 'rb') as handle: 
+        def nested_dict(): return defaultdict(nested_dict)
+        all_data.append(pickle.load(handle))
+ent_dict = calculate_radial_entropy(all_data, config.MODEL_NAMES)
+plot_radial_entropy(ent_dict, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
 
-# # Smoothness of orientation selectivity and category selectivity maps
-# plot_cluster_size(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, stats=False, save=True, show=True)
-# cluster_size_vs_eccentricity(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
-
-
-# ############################################################################################################
-# #* Figure 3 Energy consumption
-# ############################################################################################################
-# # Fig3A Energy consumption across epochs
-# epochs_to_plot = [35] + list(range(50,601,50))
-# plot_energy_consumption_across_epochs_lineplot(
-#         model_name_path_dict=config.MODEL_NAME_PATH_DICT,
-#         alphas=config.ALPHAS,
-#         seed_range=config.SEEDS_RANGE,
-#         fixed_epochs=epochs_to_plot,
-#         save_fig_path=plot_path_fig3,
-#         pre_or_postrelu='postrelu',
-#         show_plot=True,
-#     )
-
-# # Fig3B Energy consumption across eccentricity
-# plot_stacked_energy_map_energy_vs_eccentricity(
-#         model_name_path_dict=config.MODEL_NAME_PATH_DICT,
-#         alphas=config.ALPHAS,
-#         save_fig_path=plot_path_fig3,
-#         pre_or_postrelu='postrelu',
-#         prefix_list=[ 'ali_'],
-#         energy_consumption_types= ['total'],
-#         seed_range=config.SEEDS_RANGE,
-#         models_epochs_dict=config.MODELS_EPOCHS_DICT,
-#         NORM_PREV_LAYER=True,
-#         NORM_LAYER_OUT=False,
-#     )
-
-# # Fig3C Energy maps
-# plot_stacked_energy_maps_normalized(
-#         model_name_path_dict=config.MODEL_NAME_PATH_DICT,
-#         alphas=config.ALPHAS,
-#         save_fig_path=plot_path_fig3,
-#         pre_or_postrelu='postrelu',
-#         prefix_list=[ 'ali_'],
-#         energy_consumption_types= ['total'],
-#         seed_range= [1], 
-#         models_epochs_dict=config.MODELS_EPOCHS_DICT,
-#         NORM_PREV_LAYER=True,
-#         NORM_LAYER_OUT=False,
-#     )
+# Smoothness of orientation selectivity and category selectivity maps
+plot_cluster_size(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, stats=False, save=True, show=True)
+cluster_size_vs_eccentricity(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
 
 
-# ############################################################################################################
-# #* Figure 4 Behavioural analysis
-# ############################################################################################################
-# # Human object-specific biases are predicted by animacy and real-world size.
-# # Non-negative least squares GLM analysis on the averaged human ADM shows significant unique variance explained by animacy and real-world size.
-# glm_results = run_full_GLM_analysis(
-#     base_path=behaviour_src_dir,
-#     data_filename='human_adm/adm_dict_pearsonr_spearmanr.h5',
-#     plot_path = plot_path_fig4,
-#     model_type='average_human_adm',
-#     predictor_names=['animate', 'size', 'spiky'],  # or a custom list of predictors (see make_predictors() function)
-#     num_permutations=1000,
-#     verbose=True,)
+############################################################################################################
+#* Figure 3 Energy consumption
+############################################################################################################
+# Fig3A Energy consumption across epochs
+epochs_to_plot = [35] + list(range(50,601,50))
+plot_energy_consumption_across_epochs_lineplot(
+        model_name_path_dict=config.MODEL_NAME_PATH_DICT,
+        alphas=config.ALPHAS,
+        seed_range=config.SEEDS_RANGE,
+        fixed_epochs=epochs_to_plot,
+        save_fig_path=plot_path_fig3,
+        pre_or_postrelu='postrelu',
+        show_plot=True,
+    )
+
+# Fig3B Energy consumption across eccentricity
+plot_stacked_energy_map_energy_vs_eccentricity(
+        model_name_path_dict=config.MODEL_NAME_PATH_DICT,
+        alphas=config.ALPHAS,
+        save_fig_path=plot_path_fig3,
+        pre_or_postrelu='postrelu',
+        prefix_list=[ 'ali_'],
+        energy_consumption_types= ['total'],
+        seed_range=config.SEEDS_RANGE,
+        models_epochs_dict=config.MODELS_EPOCHS_DICT,
+        NORM_PREV_LAYER=True,
+        NORM_LAYER_OUT=False,
+    )
+
+# Fig3C Energy maps
+plot_stacked_energy_maps_normalized(
+        model_name_path_dict=config.MODEL_NAME_PATH_DICT,
+        alphas=config.ALPHAS,
+        save_fig_path=plot_path_fig3,
+        pre_or_postrelu='postrelu',
+        prefix_list=[ 'ali_'],
+        energy_consumption_types= ['total'],
+        seed_range= [1], 
+        models_epochs_dict=config.MODELS_EPOCHS_DICT,
+        NORM_PREV_LAYER=True,
+        NORM_LAYER_OUT=False,
+    )
+
+
+############################################################################################################
+#* Figure 4 Behavioural analysis
+############################################################################################################
+# Human object-specific biases are predicted by animacy and real-world size.
+# Non-negative least squares GLM analysis on the averaged human ADM shows significant unique variance explained by animacy and real-world size.
+glm_results = run_full_GLM_analysis(
+    base_path=behaviour_src_dir,
+    data_filename='human_adm/adm_dict_pearsonr_spearmanr.h5',
+    plot_path = plot_path_fig4,
+    model_type='average_human_adm',
+    predictor_names=['animate', 'size', 'spiky'],  # or a custom list of predictors (see make_predictors() function)
+    num_permutations=1000,
+    verbose=True,)
 
 # Spatial biases in human and model behaviour
 df_behavior_agreements = pd.read_csv(os.path.join(behaviour_src_dir, 'behaviour_analysis_results', 'df_behavior_agreements.csv'))
