@@ -18,7 +18,7 @@ from collections import defaultdict
 # Import custom modules
 from all_tnn.analysis.config import Config
 from all_tnn.analysis.util.convert_dict2h5 import read_h52dict
-from all_tnn.analysis.visualization.acc_maps_visualization import plot_bar_plot_from_df, plot_box_whiskers_from_df
+from all_tnn.analysis.visualization.acc_maps_visualization import plot_bar_plot_from_df
 from all_tnn.analysis.visualization.acc_spatial_loss import generate_analysis_df
 from all_tnn.analysis.visualization.energy_efficiency import plot_energy_consumption_across_epochs_lineplot, plot_stacked_energy_map_energy_vs_eccentricity, plot_stacked_energy_maps_normalized
 from all_tnn.analysis.visualization.layer_visualization import visualize_layer
@@ -60,138 +60,138 @@ for directory in directories:
 plot_path_fig1, plot_path_fig2, plot_path_fig3, plot_path_fig4, plot_path_fig5 = directories
 
 
-############################################################################################################
-#* Figure 1 Accuracies and spatial smoothness
-############################################################################################################
-print('Figure 1: Accuracy and spatial smoothness')
-# Categorization performance
-# Classification accuracy of all All-TNNs and control models on the ecoset test set. Running these cells will plot the figures and save them to save_dir
-df = generate_analysis_df(
-    base_src_dir_path=neural_level_h5_file_dir,
-    MODEL_NAMES=config.MODEL_NAMES,
-    seeds_range=config.SEEDS_RANGE,
-    models_epochs_dict=config.MODELS_EPOCHS_DICT,
-    MODEL_NAMES_TO_PLOT=config.MODEL_NAMES_TO_PLOT,
-    model_results_dict_filename='all_multi_models_neural_dict.h5', # or default is multi_models_neural_dict.pickle
-)
+# ############################################################################################################
+# #* Figure 1 Accuracies and spatial smoothness
+# ############################################################################################################
+# print('Figure 1: Accuracy and spatial smoothness')
+# # Categorization performance
+# # Classification accuracy of all All-TNNs and control models on the ecoset test set. Running these cells will plot the figures and save them to save_dir
+# df = generate_analysis_df(
+#     base_src_dir_path=neural_level_h5_file_dir,
+#     MODEL_NAMES=config.MODEL_NAMES,
+#     seeds_range=config.SEEDS_RANGE,
+#     models_epochs_dict=config.MODELS_EPOCHS_DICT,
+#     MODEL_NAMES_TO_PLOT=config.MODEL_NAMES_TO_PLOT,
+#     model_results_dict_filename='all_multi_models_neural_dict.h5', # or default is multi_models_neural_dict.pickle
+# )
 
-# Categorization performance
-plot_bar_plot_from_df(
-    df,
-    plot_path_fig1+'/accuracy_compare_across_alphas.pdf', 
-    x="Model", 
-    y="Accuracy", 
-    title="Categorisation performance", 
-    color3_start_id=1,
-    show_plot=True,
-    figsize=(3.54, 2),
-    log_scale=False, hline=None, significance_dict=None, 
-    show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
-    # Hybrid
-    show_boxplot=False, box_width=0.6, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
-    point_plot="strip", point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
-)
+# # Categorization performance
+# plot_bar_plot_from_df(
+#     df,
+#     plot_path_fig1+'/accuracy_compare_across_alphas.pdf', 
+#     x="Model", 
+#     y="Accuracy", 
+#     title="Categorisation performance", 
+#     color3_start_id=1,
+#     show_plot=True,
+#     figsize=(3.54, 2),
+#     log_scale=False, hline=None, significance_dict=None, 
+#     show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
+#     # Hybrid
+#     show_boxplot=False, box_width=0.6, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
+#     point_plot="strip", point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
+# )
 
-# Spatial smoothness
-# Spatial smoothness is calculated as as 1/average cosine similarity between the weights of neighbouring units for all models.
-plot_bar_plot_from_df(
-    df,
-    plot_path_fig1+'/mean_cosdist_compare_across_alphas.pdf',
-    x="Model", 
-    y="Spatial Smoothness", 
-    title="Spatial smoothness", 
-    color3_start_id=1,
-    show_plot=True,
-    figsize=(3.54, 2),
-    log_scale=True, hline=None, significance_dict=None, 
-    show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
-    # Hybrid
-    show_boxplot=False, box_width=0.6, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
-    point_plot="strip", point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
-)
+# # Spatial smoothness
+# # Spatial smoothness is calculated as as 1/average cosine similarity between the weights of neighbouring units for all models.
+# plot_bar_plot_from_df(
+#     df,
+#     plot_path_fig1+'/mean_cosdist_compare_across_alphas.pdf',
+#     x="Model", 
+#     y="Spatial Smoothness", 
+#     title="Spatial smoothness", 
+#     color3_start_id=1,
+#     show_plot=True,
+#     figsize=(3.54, 2),
+#     log_scale=True, hline=None, significance_dict=None, 
+#     show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
+#     # Hybrid
+#     show_boxplot=False, box_width=0.6, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
+#     point_plot="strip", point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
+# )
 
-############################################################################################################
-#* Figure 2 orientation and category selectivity
-############################################################################################################
-print('Figure 2: Orientation and category selectivity')
-# Orientation selectivity maps, entropy of first layer orientation selectivity, and category selectivity maps.
-seed = 1
-model_name = "TNN_alpha_10" # or pick another model
-model_results_dict_one_seed = read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5'))
-visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_0', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
-visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_5', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
+# ############################################################################################################
+# #* Figure 2 orientation and category selectivity
+# ############################################################################################################
+# print('Figure 2: Orientation and category selectivity')
+# # Orientation selectivity maps, entropy of first layer orientation selectivity, and category selectivity maps.
+# seed = 1
+# model_name = "TNN_alpha_10" # or pick another model
+# model_results_dict_one_seed = read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5'))
+# visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_0', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
+# visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_5', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
 
-# Radial entropy profile
-all_data = []
-for seed in config.SEEDS_RANGE:
-    all_data.append(read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5')))
-ent_dict = calculate_radial_entropy(all_data, config.MODEL_NAMES)
-plot_radial_entropy(ent_dict, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
+# # Radial entropy profile
+# all_data = []
+# for seed in config.SEEDS_RANGE:
+#     all_data.append(read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5')))
+# ent_dict = calculate_radial_entropy(all_data, config.MODEL_NAMES)
+# plot_radial_entropy(ent_dict, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
 
-# Smoothness of orientation selectivity and category selectivity maps
-plot_cluster_size(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, stats=False, save=True, show=True)
-cluster_size_vs_eccentricity(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
-
-
-############################################################################################################
-#* Figure 3 Energy consumption
-############################################################################################################
-print('Figure 3: Energy consumption')
-# Fig3A Energy consumption across epochs
-epochs_to_plot = [35] + list(range(50,601,50))
-plot_energy_consumption_across_epochs_lineplot(
-        model_name_path_dict=config.MODEL_NAME_PATH_DICT,
-        alphas=config.ALPHAS,
-        seed_range=config.SEEDS_RANGE,
-        fixed_epochs=epochs_to_plot,
-        save_fig_path=plot_path_fig3,
-        pre_or_postrelu='postrelu',
-        show_plot=True,
-    )
-
-# Fig3B Energy consumption across eccentricity
-plot_stacked_energy_map_energy_vs_eccentricity(
-        model_name_path_dict=config.MODEL_NAME_PATH_DICT,
-        alphas=config.ALPHAS,
-        save_fig_path=plot_path_fig3,
-        pre_or_postrelu='postrelu',
-        prefix_list=[ 'ali_'],
-        energy_consumption_types= ['total'],
-        seed_range=config.SEEDS_RANGE,
-        models_epochs_dict=config.MODELS_EPOCHS_DICT,
-        NORM_PREV_LAYER=True,
-        NORM_LAYER_OUT=False,
-    )
-
-# Fig3C Energy maps
-plot_stacked_energy_maps_normalized(
-        model_name_path_dict=config.MODEL_NAME_PATH_DICT,
-        alphas=config.ALPHAS,
-        save_fig_path=plot_path_fig3,
-        pre_or_postrelu='postrelu',
-        prefix_list=[ 'ali_'],
-        energy_consumption_types= ['total'],
-        seed_range= [1],
-        models_epochs_dict=config.MODELS_EPOCHS_DICT,
-        NORM_PREV_LAYER=True,
-        NORM_LAYER_OUT=False,
-    )
+# # Smoothness of orientation selectivity and category selectivity maps
+# plot_cluster_size(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, stats=False, save=True, show=True)
+# cluster_size_vs_eccentricity(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
 
 
-############################################################################################################
-#* Figure 4 Behavioural analysis
-############################################################################################################
-print('Figure 4: Behavioural analysis')
-# Human object-specific biases are predicted by animacy and real-world size.
-# Non-negative least squares GLM analysis on the averaged human ADM shows significant unique variance explained by animacy and real-world size.
-glm_results = run_full_GLM_analysis(
-    base_path=behaviour_src_dir,
-    data_filename='human_adm/adm_dict_pearsonr_spearmanr.h5',
-    plot_path = plot_path_fig4,
-    model_type='average_human_adm',
-    predictor_names=['animate', 'size', 'spiky'],  # or a custom list of predictors (see make_predictors() function)
-    num_permutations=1000,
-    verbose=True,)
+# ############################################################################################################
+# #* Figure 3 Energy consumption
+# ############################################################################################################
+# print('Figure 3: Energy consumption')
+# # Fig3A Energy consumption across epochs
+# epochs_to_plot = [35] + list(range(50,601,50))
+# plot_energy_consumption_across_epochs_lineplot(
+#         model_name_path_dict=config.MODEL_NAME_PATH_DICT,
+#         alphas=config.ALPHAS,
+#         seed_range=config.SEEDS_RANGE,
+#         fixed_epochs=epochs_to_plot,
+#         save_fig_path=plot_path_fig3,
+#         pre_or_postrelu='postrelu',
+#         show_plot=True,
+#     )
+
+# # Fig3B Energy consumption across eccentricity
+# plot_stacked_energy_map_energy_vs_eccentricity(
+#         model_name_path_dict=config.MODEL_NAME_PATH_DICT,
+#         alphas=config.ALPHAS,
+#         save_fig_path=plot_path_fig3,
+#         pre_or_postrelu='postrelu',
+#         prefix_list=[ 'ali_'],
+#         energy_consumption_types= ['total'],
+#         seed_range=config.SEEDS_RANGE,
+#         models_epochs_dict=config.MODELS_EPOCHS_DICT,
+#         NORM_PREV_LAYER=True,
+#         NORM_LAYER_OUT=False,
+#     )
+
+# # Fig3C Energy maps
+# plot_stacked_energy_maps_normalized(
+#         model_name_path_dict=config.MODEL_NAME_PATH_DICT,
+#         alphas=config.ALPHAS,
+#         save_fig_path=plot_path_fig3,
+#         pre_or_postrelu='postrelu',
+#         prefix_list=[ 'ali_'],
+#         energy_consumption_types= ['total'],
+#         seed_range= [1],
+#         models_epochs_dict=config.MODELS_EPOCHS_DICT,
+#         NORM_PREV_LAYER=True,
+#         NORM_LAYER_OUT=False,
+#     )
+
+
+# ############################################################################################################
+# #* Figure 4 Behavioural analysis
+# ############################################################################################################
+# print('Figure 4: Behavioural analysis')
+# # Human object-specific biases are predicted by animacy and real-world size.
+# # Non-negative least squares GLM analysis on the averaged human ADM shows significant unique variance explained by animacy and real-world size.
+# glm_results = run_full_GLM_analysis(
+#     base_path=behaviour_src_dir,
+#     data_filename='human_adm/adm_dict_pearsonr_spearmanr.h5',
+#     plot_path = plot_path_fig4,
+#     model_type='average_human_adm',
+#     predictor_names=['animate', 'size', 'spiky'],  # or a custom list of predictors (see make_predictors() function)
+#     num_permutations=1000,
+#     verbose=True,)
 
 # Spatial biases in human and model behaviour
 df_behavior_agreements = pd.read_csv(os.path.join(behaviour_src_dir, 'behaviour_analysis_results', 'df_behavior_agreements.csv'))
@@ -207,7 +207,7 @@ plot_bar_plot_from_df(
     log_scale=False, hline=None, significance_dict=None, 
     show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
     # Hybrid
-    show_boxplot=True, box_width=0.6, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
+    show_boxplot=True, box_width=0.2, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
     point_plot=None, point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
 )
 
@@ -225,7 +225,7 @@ plot_bar_plot_from_df(
     log_scale=False, hline=None, significance_dict=None, 
     show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
     # Hybrid
-    show_boxplot=True, box_width=0.6, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
+    show_boxplot=True, box_width=0.2, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
     point_plot=None, point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
 )
 

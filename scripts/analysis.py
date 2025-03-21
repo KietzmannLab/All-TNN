@@ -391,8 +391,9 @@ def analysis_multi_models():
                             df_behaviour_agreements.to_csv(f"{config.BEHAVIOUR_ANALYSIS_RESULT_DIR}/df_behaviour_agreement.csv")
 
                             # Noise ceiling line
-                            hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if PLOT_NC else None
+                            hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if config.PLOT_NC else None
 
+                            
                             plot_bar_plot_from_df(
                                 df_behaviour_agreements,
                                 add_epoch_to_save_dir_name(config.BEHAVIOUR_AGREEMENT_ANALYSIS_PATH, save_path_suffix),
@@ -409,22 +410,22 @@ def analysis_multi_models():
                         # Figure 4E & 5H: Behavioural ADM alignment
                         # --------------------------
                         if config.BEHAVIOURAL_ADM_ALIGNMENT:
-                            COLUMNS[1] = config.RSA_METRIC
+                            config.COLUMNS[1] = config.RSA_METRIC
                             df_adm_agreement, noise_ceiling, significance_dict, adm_dict = adm_alignment_analysis(
                                 raw_individuals_vs_seeds_model_acc_maps=[
                                     behaviour_data['raw_individual_participants_5x5_acc_maps_array']
                                 ] + [
                                     behaviour_data['seeds_model_data'].get(mn, [])
-                                    for mn in config.MODELS[:]
+                                    for mn in MODELS[:]
                                 ],
-                                model_names=config.MODELS,
+                                model_names=MODELS,
                                 seeds_list=config.SEEDS_RANGE,
                                 comparison_modes=config.BEHAVIOUR_ANALYSIS_MODES,
                                 create_adm_metric=config.ADM_METRIC,
                                 rsa_metric=config.RSA_METRIC,
                                 columns=config.COLUMNS ,
                                 categories_num=config.CATEGORIES_NUM,
-                                map_norm_mode=config.MAP_NORM_MODE,
+                                map_norm_mode=map_norm_mode,
                                 sampling_num=config.SAMPLING_NUM,
                                 alignment_mode = alignment_mode,
                                 model_names_to_plot=config.MODEL_NAMES_TO_PLOT,
@@ -440,14 +441,14 @@ def analysis_multi_models():
                                 f'ep_{save_path_suffix}',
                                 f'adm_dict_{this_epoch[1]}_{size_factor}_{config.ALIGNMENT_METRIC}_{config.RSA_METRIC}.h5'
                             )
-                            with h5py.File(adm_dict_file_path, 'w') as hf:
-                                for k, v in adm_dict.items():
-                                    hf.create_dataset(k, data=v)
+                            # with h5py.File(adm_dict_file_path, 'w') as hf:
+                            #     for k, v in adm_dict.items():
+                            #         hf.create_dataset(k, data=v)
 
                             plot_significance_matrix(
                                 significance_dict,
                                 roi_labels_to_plot=['ADM Agreement'],
-                                model_names=config.MODELS[:],
+                                model_names=MODELS[:],
                                 model_names_to_plot=config.MODEL_NAMES_TO_PLOT,
                                 save_dir=os.path.join(config.BEHAVIOUR_ANALYSIS_RESULT_DIR, f'ep_{save_path_suffix}'),
                                 num_cols=1
@@ -456,8 +457,10 @@ def analysis_multi_models():
                             df_adm_agreement.to_csv(f"{config.BEHAVIOUR_ANALYSIS_RESULT_DIR}/df_adm_agreement.csv")
 
                             # Noise ceiling line
-                            hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if PLOT_NC else None
+                            hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if config.PLOT_NC else None
 
+                            # TODO try no boostrap? 
+                            import pdb; pdb.set_trace()
                             plot_bar_plot_from_df(
                                 df_adm_agreement,
                                 add_epoch_to_save_dir_name(config.ADM_AGREEMENT_ANALYSIS_PATH, save_path_suffix),

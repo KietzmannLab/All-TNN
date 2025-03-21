@@ -45,6 +45,7 @@ def barplot(
     log_scale=False,
     hline=None,
     significance_dict=None,
+    verbose=False,
 ):
     """
     Create a more elegant “hybrid” plot with optional bars + boxplots
@@ -116,8 +117,17 @@ def barplot(
             # Thicken & color-match the error-bar lines
             for i, line in enumerate(ax.lines):
                 line.set_linewidth(error_bar_width)
+                # style as normal line
+                line.set_linestyle('-')
                 c = cocclor_platte[(i // 3) % len(cocclor_platte)]
                 line.set_color(c)
+            
+            if verbose:
+                print("Barplot (Mean and 95% CI):")
+                for bar, line in zip(bar_ax.patches, bar_ax.lines[1::3]):
+                    mean_val = bar.get_height()
+                    ci_val = line.get_ydata()
+                    print(f"Mean: {mean_val:.3f}, 95% CI: [{ci_val[0]:.3f}, {ci_val[1]:.3f}]")
             
         # --------------------------------------------------
         # 2) Optional boxplot
@@ -142,6 +152,16 @@ def barplot(
                 ax=ax,
                 zorder=3
             )
+
+            if verbose:
+                print("\nBoxplot (Median, Limits, Whiskers):")
+                for line, patch in zip(box_ax.lines[4::6], box_ax.artists):
+                    median = line.get_ydata()[0]
+                    box_coords = patch.get_path().vertices[:, 1]
+                    box_bottom, box_top = np.min(box_coords), np.max(box_coords)
+                    whisker_bottom = box_ax.lines[box_ax.lines.index(line)-2].get_ydata()[1]
+                    whisker_top = box_ax.lines[box_ax.lines.index(line)-1].get_ydata()[1]
+                    print(f"Median: {median:.3f}, Box limits: [{box_bottom:.3f}, {box_top:.3f}], Whiskers: [{whisker_bottom:.3f}, {whisker_top:.3f}]")
 
 
         # --------------------------------------------------
@@ -214,6 +234,7 @@ def plot_bar_plot_from_df(df,
                         show_plot=True,
                         color3_start_id=0,
                         figsize=(6, 4),
+                        verbose=False,
                         **kwargs):
     """
     A thin wrapper that calls barplot(...) with data from a DataFrame,
@@ -229,6 +250,7 @@ def plot_bar_plot_from_df(df,
             y=y,
             hue=hue,
             data=df,
+            verbose=verbose,
             **kwargs
         )
 
