@@ -214,6 +214,10 @@ def get_model_accuracy_maps(result_source_dir, model_name, seed, epoch, alpha, m
         raise NotImplementedError(f"{model_name} model is not supported")
     if model_name in ["8_neighbours_TNN_alpha_10_lr_0.05", 'shifted_TNN_alpha_10_lr_0.05']:
         seed = 1
+    if model_name in ["TDANN_imagenet_supervised", "TDANN_imagenet_self_supervised"]:
+        if model_name == "TDANN_imagenet_supervised":
+            seed = 1
+        model_path = result_source_dir+f"acc_maps_{model_name}_{size_factor}_model_id_{seed}_ep200.npy"
 
     epoch = model_epoch_map[model_name][seed-1]
     model_path = f"{result_source_dir}acc_maps_{model_name}_{size_factor}_model_id_{seed}_ep{epoch}.npy"

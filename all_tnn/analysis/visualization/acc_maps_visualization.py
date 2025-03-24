@@ -6,6 +6,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches  # Ensure this is imported
+from brokenaxes import brokenaxes
 import scipy.stats as stats
 from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib as mpl
@@ -28,6 +29,7 @@ def barplot(
     y=None,
     hue=None,
     data=None,
+    y_breaks=None,
     # ----------------
     show_barplot=True, 
     bar_width=0.6,
@@ -87,13 +89,21 @@ def barplot(
         # Fetch your color palette
         cocclor_platte = COLOR_THEME_WITH_ALPHA_SWEEP[color3_start_id:]
 
-        fig, ax = plt.subplots(figsize=figsize)
+
+        # If y_breaks is provided, we use brokenaxes.
+        if y_breaks is not None:
+            fig = plt.figure(figsize=figsize)
+            bax = brokenaxes(ylims=y_breaks, xlims=None, hspace=.15) # y_breaks should be a list of tuples, e.g. [(0, 1), (5, 10)]
+            ax =  bax.axs[1]  # Select one of the underlying Axes
+            ax.set_ylim(y_breaks[0][0], y_breaks[0][1]) # limit ax to lower than first y_break
+        else:
+            fig, ax = plt.subplots(figsize=figsize)
        
 
         # 1) Optional barplot
         # --------------------------------------------------
         if show_barplot:
-            sns.barplot(
+            bar_ax = sns.barplot(
                 x=x,
                 y=y,
                 hue=hue,
@@ -122,12 +132,6 @@ def barplot(
                 c = cocclor_platte[(i // 3) % len(cocclor_platte)]
                 line.set_color(c)
             
-            if verbose:
-                print("Barplot (Mean and 95% CI):")
-                for bar, line in zip(bar_ax.patches, bar_ax.lines[1::3]):
-                    mean_val = bar.get_height()
-                    ci_val = line.get_ydata()
-                    print(f"Mean: {mean_val:.3f}, 95% CI: [{ci_val[0]:.3f}, {ci_val[1]:.3f}]")
             
         # --------------------------------------------------
         # 2) Optional boxplot
@@ -135,7 +139,7 @@ def barplot(
         if show_boxplot:
             gray_alpha = to_rgba('gray', alpha=0.4)
 
-            boxplot_obj = sns.boxplot(
+            box_ax = sns.boxplot(
                 x=x, 
                 y=y,
                 hue=hue,
@@ -152,16 +156,6 @@ def barplot(
                 ax=ax,
                 zorder=3
             )
-
-            if verbose:
-                print("\nBoxplot (Median, Limits, Whiskers):")
-                for line, patch in zip(box_ax.lines[4::6], box_ax.artists):
-                    median = line.get_ydata()[0]
-                    box_coords = patch.get_path().vertices[:, 1]
-                    box_bottom, box_top = np.min(box_coords), np.max(box_coords)
-                    whisker_bottom = box_ax.lines[box_ax.lines.index(line)-2].get_ydata()[1]
-                    whisker_top = box_ax.lines[box_ax.lines.index(line)-1].get_ydata()[1]
-                    print(f"Median: {median:.3f}, Box limits: [{box_bottom:.3f}, {box_top:.3f}], Whiskers: [{whisker_bottom:.3f}, {whisker_top:.3f}]")
 
 
         # --------------------------------------------------
@@ -195,9 +189,41 @@ def barplot(
         # --------------------------------------------------
         if significance_dict:
             add_significance(ax, data, y, significance_dict)
+        
+        # --------------------------------------------------
+        # 6) Verbose: Print computed stats
+        # --------------------------------------------------
+        if verbose and data is not None:
+            # Grouping: if hue is provided, group by both x and hue; otherwise just by x.
+            group_cols = [x] if hue is None else [x, hue]
+            for group_key, group_df in data.groupby(group_cols):
+                values = group_df[y].dropna().values
+                if show_barplot:
+                    mean_val = np.mean(values)
+                    n = len(values)
+                    sem_val = stats.sem(values) if n > 1 else 0.0
+                    ci_low = mean_val - 1.96 * sem_val
+                    ci_high = mean_val + 1.96 * sem_val
+                    print(f"Barplot Group {group_key}: mean={mean_val:.3f}, 95% CI=({ci_low:.3f}, {ci_high:.3f})")
+                if show_boxplot:
+                    median_val = np.median(values)
+                    q1 = np.percentile(values, 25)
+                    q3 = np.percentile(values, 75)
+                    if isinstance(box_whis, tuple):
+                        whisker_low = np.percentile(values, box_whis[0])
+                        whisker_high = np.percentile(values, box_whis[1])
+                    else:
+                        iqr = q3 - q1
+                        whisker_low = q1 - box_whis * iqr
+                        whisker_high = q3 + box_whis * iqr
+                    # Outliers are determined by data points that are greater than 1.5× size from the box | or outliers = values[(values < whisker_low) | (values > whisker_high)] # Outliers defined as points outside the whiskers
+                    outliers = values[(values < q1 - 1.5 * (q3 - q1)) | (values > q3 + 1.5 * (q3 - q1))]
+                    print(f"Boxplot Group {group_key}: center (median)={median_val:.3f}, limits=({q1:.3f}, {q3:.3f}), whiskers=({whisker_low:.3f}, {whisker_high:.3f}), points={outliers}")
+                # if point_plot in ['strip', 'swarm']:
+                #     print(f"Point Plot Group {group_key}: points={values}")
 
         # --------------------------------------------------
-        # 6) Aesthetics
+        # 7) Aesthetics
         # --------------------------------------------------
         ax.set(title=title)
         ax.tick_params(right=False, top=False, bottom=False, which='both')
@@ -235,6 +261,7 @@ def plot_bar_plot_from_df(df,
                         color3_start_id=0,
                         figsize=(6, 4),
                         verbose=False,
+                        y_breaks=None,
                         **kwargs):
     """
     A thin wrapper that calls barplot(...) with data from a DataFrame,
@@ -251,6 +278,7 @@ def plot_bar_plot_from_df(df,
             hue=hue,
             data=df,
             verbose=verbose,
+            y_breaks=y_breaks,
             **kwargs
         )
 

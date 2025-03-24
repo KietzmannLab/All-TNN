@@ -51,10 +51,15 @@ class Config:
             "CNN": "tnn_conv_control_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_chunked",
             "LCN": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha0.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
             "TNN_alpha_1": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha1.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
-            # "TNN_alpha_10": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
-            # "TNN_alpha_100": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha100.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
-            "TNN_simclr_finetune": "finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
-            "shifted_TNN_alpha_10": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks",
+            "TNN_alpha_10": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
+            "TNN_alpha_100": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_1e-05_alpha100.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
+            # "TNN_simclr_finetune": "finetuned_tnn_simclr_no_flip_ecoset_seed1_drop0.0_learnable_False_1e-05_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks",
+            # "shifted_TNN_alpha_10": "tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_2024.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_shifted_square256_proper_chunks",
+        
+            # '8_neighbours_TNN_alpha_10': 'tnn_ecoset_l2_no_flip_seed1_drop0.0_learnable_False_8888.0_alpha10.0_constant_20_0.1Factors_adam0.05_L21e-06_ecoset_square256_proper_chunks',
+            
+            # "TDANN_imagenet_supervised": '',
+            # "TDANN_imagenet_self_supervised": '', 
         }
         self.MODEL_NAMES = list(self.MODEL_NAME_PATH_DICT.keys())[1:]
 
@@ -66,6 +71,11 @@ class Config:
             "TNN_alpha_100": [600] * 5,
             "TNN_simclr_finetune": [600] * 5,
             "shifted_TNN_alpha_10": [300] * 5,
+
+            "TDANN_imagenet_supervised": [200] * 5,
+            "TDANN_imagenet_self_supervised": [200] * 5,
+            '8_neighbours_TNN_alpha_10': [600] * 5,
+
         }
 
         # Prepend BASE_MODEL_DIR to every path in MODEL_NAME_PATH_DICT (when not None)
@@ -85,6 +95,10 @@ class Config:
             "TNN_simclr": 10.0,
             "TNN_simclr_finetune": 10.0,
             "shifted_TNN_alpha_10": 10.0,
+            "8_neighbours_TNN_alpha_10": 10.0,
+
+            "TDANN_imagenet_supervised": 0.0,
+            "TDANN_imagenet_self_supervised": 0.0,
         }
 
         self.MODEL_NAMES_TO_PLOT = {
@@ -95,6 +109,10 @@ class Config:
             "TNN_alpha_100": "All-TNN\n($\\alpha=100$)",
             "TNN_simclr_finetune": "All-TNN\nSimCLR\n($\\alpha=10$)",
             "shifted_TNN_alpha_10": "Shifted All-TNN\n($\\alpha=10$)",
+
+            '8_neighbours_TNN_alpha_10_lr_0.05': '8-Neighbours All-TNN' + '\n'  + r'($\alpha=10$)',
+            "TDANN_imagenet_supervised": 'TDANN' + '\n' + 'Supervised',
+            "TDANN_imagenet_self_supervised": 'TDANN' + '\n' + 'Self-Supervised',
         }
 
         # -------------------------------------------------------------------

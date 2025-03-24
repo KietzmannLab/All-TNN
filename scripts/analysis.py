@@ -404,6 +404,14 @@ def analysis_multi_models():
                                 color3_start_id=1,
                                 hline=hline,
                                 figsize=(3.54, 2),
+                                y_breaks = [(0, 0.2),  (0.40,  0.44)],
+
+                                log_scale=False, significance_dict=None, 
+                                show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
+                                # Hybrid
+                                show_boxplot=True, box_width=0.2, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
+                                point_plot=None, point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
+                                verbose=True,
                             )
 
                         # --------------------------
@@ -460,7 +468,7 @@ def analysis_multi_models():
                             hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if config.PLOT_NC else None
 
                             # TODO try no boostrap? 
-                            import pdb; pdb.set_trace()
+                            # import pdb; pdb.set_trace()
                             plot_bar_plot_from_df(
                                 df_adm_agreement,
                                 add_epoch_to_save_dir_name(config.ADM_AGREEMENT_ANALYSIS_PATH, save_path_suffix),
@@ -471,6 +479,14 @@ def analysis_multi_models():
                                 color3_start_id=1,
                                 hline=hline,
                                 figsize=(3.54, 2),
+                                y_breaks = [(0, 0.15),  (0.30,  0.34)], 
+
+                                log_scale=False, significance_dict=None, 
+                                show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
+                                # Hybrid
+                                show_boxplot=True, box_width=0.2, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
+                                point_plot=None, point_plot_kwargs={"size": 2, "alpha": 0.5}, 
+                                verbose=True, 
                             )
 
 

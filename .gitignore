@@ -4,6 +4,9 @@ slurm_train.py
 slurm_submit_job.sh
 setup_env*s
 ./save_dir/
+All-TNN_share
+./All-TNN_share/
+./All-TNN_share/*
 h100*
 ./save_dir/
 ./save_dir/*
