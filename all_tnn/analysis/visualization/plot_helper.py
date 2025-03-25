@@ -1,5 +1,3 @@
-
-
 import os
 import numpy as np
 import pandas as pd
@@ -16,30 +14,28 @@ from matplotlib.colors import to_rgba
 from all_tnn.analysis.visualization.colors import COLOR_THEME, COLOR_THEME_WITH_ALPHA_SWEEP, COLOR_THEME_WITH_ALPHA_SWEEP
 import scienceplots
 plt.style.use([ 'nature','science',"ieee",'no-latex'])
-
 color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:]
-
 
 def barplot(
     save_path=None,
     title=None,
     color3_start_id=0,
-    figsize=(6, 4),
+    figsize=(3.54, 2),
     x=None,
     y=None,
     hue=None,
     data=None,
     y_breaks=None,
     # ----------------
-    show_barplot=True, 
+    show_barplot=True,
     bar_width=0.6,
     bar_alpha=0.4,
     error_bar_width=2,
     # ----------------
     show_boxplot=False,
-    box_width=0.4,
-    box_linewidth=1.5,
-    box_alpha=0.4,
+    box_width=0.2,
+    box_linewidth=1,
+    box_alpha=0.2,
     box_whis=(5, 95),
     # ----------------
     point_plot=None,            # "strip", "swarm", or None
@@ -87,8 +83,12 @@ def barplot(
         plt.rcParams['font.family'] = 'sans-serif'
 
         # Fetch your color palette
-        cocclor_platte = COLOR_THEME_WITH_ALPHA_SWEEP[color3_start_id:]
-
+        if isinstance(color3_start_id, int):
+            color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[color3_start_id:]
+        elif isinstance(color3_start_id, list): # index into list with list of indices
+            color_palette = [COLOR_THEME_WITH_ALPHA_SWEEP[i] for i in color3_start_id]
+        else:
+            color_palette = color_palette
 
         # If y_breaks is provided, we use brokenaxes.
         if y_breaks is not None:
@@ -98,7 +98,7 @@ def barplot(
             ax.set_ylim(y_breaks[0][0], y_breaks[0][1]) # limit ax to lower than first y_break
         else:
             fig, ax = plt.subplots(figsize=figsize)
-       
+
 
         # 1) Optional barplot
         # --------------------------------------------------
@@ -108,7 +108,7 @@ def barplot(
                 y=y,
                 hue=hue,
                 data=data,
-                palette=cocclor_platte,
+                palette=color_palette,
                 edgecolor='none',
                 linewidth=0,
                 width=bar_width,
@@ -119,7 +119,7 @@ def barplot(
             )
             # Style the bars
             for i, patch in enumerate(ax.patches):
-                c = cocclor_platte[i % len(cocclor_platte)]
+                c = color_palette[i % len(color_palette)]
                 patch.set_facecolor(to_rgba(c, alpha=bar_alpha))
                 patch.set_edgecolor(c)
                 patch.set_linewidth(1.0)
@@ -129,10 +129,10 @@ def barplot(
                 line.set_linewidth(error_bar_width)
                 # style as normal line
                 line.set_linestyle('-')
-                c = cocclor_platte[(i // 3) % len(cocclor_platte)]
+                c = color_palette[(i // 3) % len(color_palette)]
                 line.set_color(c)
-            
-            
+
+
         # --------------------------------------------------
         # 2) Optional boxplot
         # --------------------------------------------------
@@ -140,11 +140,11 @@ def barplot(
             gray_alpha = to_rgba('gray', alpha=0.4)
 
             box_ax = sns.boxplot(
-                x=x, 
+                x=x,
                 y=y,
                 hue=hue,
                 data=data,
-                palette=["white"] * len(cocclor_platte),  # white boxes initially
+                palette=["white"] * len(color_palette),  # white boxes initially
                 width=box_width,
                 whis=box_whis,
                 showfliers=False,
@@ -189,7 +189,7 @@ def barplot(
         # --------------------------------------------------
         if significance_dict:
             add_significance(ax, data, y, significance_dict)
-        
+
         # --------------------------------------------------
         # 6) Verbose: Print computed stats
         # --------------------------------------------------
@@ -235,7 +235,7 @@ def barplot(
         # Proper manual margin adjustment for categorical axes
         margin = 0.6
         ax.set_xlim(ax.get_xlim()[0] - margin, ax.get_xlim()[1] + margin)
-        
+
 
         # --------------------------------------------------
         # 7) Save figure if desired
@@ -259,7 +259,7 @@ def plot_bar_plot_from_df(df,
                         title="Models Comparison",
                         show_plot=True,
                         color3_start_id=0,
-                        figsize=(6, 4),
+                        figsize=(3.54, 2),
                         verbose=False,
                         y_breaks=None,
                         **kwargs):
@@ -299,7 +299,7 @@ def plot_stacked_bar_plot(df_main, df_percentage, path, x="Model", y="Effect", h
     from .colors import COLOR_THEME
     plt.style.use([ 'nature','science',"ieee",'no-latex'])
     with plt.style.context(['nature', 'science', "ieee", 'no-latex']):
-    
+
         df_main['Group'] = 'Spatial Prior'
         df_percentage['Group'] = 'Common Prior'
 
@@ -324,24 +324,24 @@ def plot_stacked_bar_plot(df_main, df_percentage, path, x="Model", y="Effect", h
             plt.show()
         else:
             plt.close()
-        
+
 
 def plot_mask_ditribution_img(class_name, source_dir = "/home/hpczeji1/Datasets/annotations/numpy_save/", if_show= True,if_print = False):
     """plot object distribution of one specific category (id)
 
     Args:
-        class_name (int): category id 
+        class_name (int): category id
         source_dir (str, optional): dir path that saved objects distribution map.npy. Defaults to "/home/hpczeji1/Datasets/annotations/numpy_save/".
         if_show (bool, optional): whether show maps. Defaults to True.
         if_print (bool, optional): if print objects distribution info. Defaults to False.
 
     Returns:
         matrix: object distribution map
-    """    
-    
+    """
+
     class_mask_distribution_matrix = np.load(os.path.join(source_dir,str(class_name)+".npy"))
     normed_class_mask_distribution_matrix = class_mask_distribution_matrix/np.sum(class_mask_distribution_matrix)
-    
+
     if if_print:
         print(f"{class_name} mask_distribution_matrix shape{class_mask_distribution_matrix.shape} sum {np.sum(class_mask_distribution_matrix)} max {np.max(class_mask_distribution_matrix)} min {np.min(class_mask_distribution_matrix)} sum {np.sum(class_mask_distribution_matrix)}")
     if if_show:
@@ -350,9 +350,10 @@ def plot_mask_ditribution_img(class_name, source_dir = "/home/hpczeji1/Datasets/
     return normed_class_mask_distribution_matrix
 
 ## --- Visualize the acc maps across different models --- ##
-
-def plot_N_matrices_comparison(N_img_lists,model_names,N=3,N_img_name_list = None, nrows=4,ncols=4,vmin =None, vmax=None, figsize = None,show_values = "",save_path=None, vmin_max_ignore_id = None,colorbar_name='',frontsize=10,dpi=100,show_plot=False,color_platte_name="magma",*args,**kwarg):
-    """Plot multi matrices togethear in comparison across 16 categories, 
+def plot_N_matrices_comparison(N_img_lists, model_names ,N=3 ,N_img_name_list = None, nrows=4, ncols=4, vmin =None, vmax=None,
+    figsize = None,show_values = "",save_path=None, vmin_max_ignore_id = None, colorbar_name='', frontsize=10, dpi=100,
+    show_plot=False, color_platte_name="magma",*args,**kwarg):
+    """Plot multi matrices togethear in comparison across 16 categories,
         here for [Object distribution,humans, NCN, CNN ]
 
     Args:
@@ -370,7 +371,7 @@ def plot_N_matrices_comparison(N_img_lists,model_names,N=3,N_img_name_list = Non
         colorbar_name (str, optional): . Defaults to 'KL Divergence'.
         frontsize (int, optional): . Defaults to 10.
     """
-    with plt.style.context(['nature', 'science', "ieee", 'no-latex']):    
+    with plt.style.context(['nature', 'science', "ieee", 'no-latex']):
         fm = mpl.font_manager
         fm._get_fontconfig_fonts.cache_clear()
         plt.rcParams['font.family'] = 'sans-serif'
@@ -383,10 +384,10 @@ def plot_N_matrices_comparison(N_img_lists,model_names,N=3,N_img_name_list = Non
             for j, col in enumerate(row):
 
                 index = (ncols*N*i+ j)//N
-                
+
                 for k in range(N):
                     if (N*i+ j) % N == k:
-                    
+
                         img = N_img_lists[k][index]
                         if show_values:
                             for p in range(img.shape[0]):
@@ -395,7 +396,7 @@ def plot_N_matrices_comparison(N_img_lists,model_names,N=3,N_img_name_list = Non
                                     col.text(q+0.05, p+0.05, str(c), va='center', ha='center')
 
                         if vmin is not None and vmax is not None:
-                            
+
                             if vmin_max_ignore_id ==k:
                                 im = col.imshow(img, cmap=mpl.colormaps['viridis'])
                             else:
@@ -405,22 +406,22 @@ def plot_N_matrices_comparison(N_img_lists,model_names,N=3,N_img_name_list = Non
                         col.set_yticks([])
                         col.set_xticks([])
                         if N_img_name_list is not None:
-                            col.set_title(N_img_name_list[k][index],fontsize = frontsize) 
+                            col.set_title(N_img_name_list[k][index],fontsize = frontsize)
 
                         # Add model name to the last row
                         if i == nrows - 1:  # Check if it's the last row
                             col.set_xlabel(model_names[k],fontsize=frontsize+3)  # Add the model name under each subplot in the last row
 
-                        
+
         position=fig.add_axes([1.02, 0.2, 0.01, 0.6])  #  [left, bottom, width, height] of colorbar position
-        cb=plt.colorbar(im,cax=position,orientation='vertical') 
+        cb=plt.colorbar(im,cax=position,orientation='vertical')
         cb.set_label(colorbar_name, rotation=270)
         # plt.tight_layout()
-        
+
         if save_path is not None:
             plt.savefig(save_path, bbox_inches = 'tight',facecolor="white", dpi =dpi,transparent=True)
             plt.savefig(save_path.split(".")[0]+".svg", bbox_inches = 'tight',facecolor="white", transparent=True)
-        
+
         if show_plot:
             plt.show()
         else:
@@ -639,7 +640,7 @@ def plot_accuracy_maps(individual_acc_maps_raw, category_names, behaviour_analys
     - category_names: List of category names corresponding to the data.
     - behaviour_analysis_result_dir: Directory path where the result will be saved.
     """
-    
+
     # Plotting setup
     num_cat = len(category_names)
     num_participants = individual_acc_maps_raw.shape[0]
@@ -660,7 +661,7 @@ def plot_accuracy_maps(individual_acc_maps_raw, category_names, behaviour_analys
 
     plt.tight_layout()
     fig.colorbar(cax, ax=axes.ravel().tolist(), orientation='horizontal', pad=0.01, aspect=100)
-    
+
     # Ensure the output directory exists
     maps_visualization_dir = os.path.join(behaviour_analysis_result_dir, 'maps_visualization')
     os.makedirs(maps_visualization_dir, exist_ok=True)
@@ -668,7 +669,7 @@ def plot_accuracy_maps(individual_acc_maps_raw, category_names, behaviour_analys
 
 
 def plot_with_error_bars(df, title, ylabel, model_names, size_factors, save_path, colors = COLOR_THEME_WITH_ALPHA_SWEEP[1:]):
-    
+
     plt.figure(figsize=(3.54, 2))  # half paper width
     for model_name, color in zip(model_names, colors):
         means = df.loc[model_name].apply(lambda x: np.mean(x) if isinstance(x, np.ndarray) else np.nan).values
@@ -714,7 +715,7 @@ def plot_combined_accuracy_matrices(accuracy_results, plot_save_dir):
 
         #* Notice /np.max(matrix) lead matrix range in [0,1], and need to set vim = 0, vmax = 1
         im = axs[row, col].imshow(matrix/np.max(matrix), cmap='magma', interpolation='nearest',\
-                                vmin =0, vmax = 1)  
+                                vmin =0, vmax = 1)
         try:
             axs[row, col].set_title(f"{cat.decode('utf-8')}")
         except:
@@ -758,7 +759,7 @@ def plot_and_save_confusion_matrix(conf_matrix, categories, acc_maps_save_dir, m
 
     # Save the plot as an image file
     plt.savefig(f"{acc_maps_save_dir}confusion_matrix_{model_name}_{data_id}_model_id_{seed}_ep{epoch}.pdf", dpi=300)
-    plt.close(fig) 
+    plt.close(fig)
 
 
 
@@ -778,25 +779,25 @@ def add_significance(ax, data, col_name, significance_dict):
             # Calculate the middle position for the asterisk and the line break
             mid_point = (x1 + x2) / 2
             asterisk_width = 0.25 # # Determine the space to leave for the asterisk * (x2 - x1)  # 10% of the bar width
-            
+
             if asterisks != '':
                 # Draw the first line segment (left)
-                ax.plot([x1, x1, mid_point - asterisk_width], 
-                        [height + y_offset, height + y_offset * 1.05, height + y_offset * 1.05], 
+                ax.plot([x1, x1, mid_point - asterisk_width],
+                        [height + y_offset, height + y_offset * 1.05, height + y_offset * 1.05],
                         lw=0.5, c='black', linestyle='-')
                 # Draw the second line segment (right), set line width to 0.5
-                ax.plot([mid_point + asterisk_width, x2, x2], 
-                        [height + y_offset * 1.05, height + y_offset * 1.05, height + y_offset], 
+                ax.plot([mid_point + asterisk_width, x2, x2],
+                        [height + y_offset * 1.05, height + y_offset * 1.05, height + y_offset],
                         lw=0.5, c='black', linestyle='-')
                 # Add asterisks in the middle of the line break
-                ax.text(mid_point, height + y_offset * 1.05, asterisks, 
-                        ha='center', va='center', color='black', fontsize=12, fontweight='bold') 
-            
+                ax.text(mid_point, height + y_offset * 1.05, asterisks,
+                        ha='center', va='center', color='black', fontsize=12, fontweight='bold')
+
             # If asterisks are empty, plot a continuous line across
             else:
                 # Draw a continuous line without breaks
-                ax.plot([x1, x2], 
-                        [height + y_offset, height + y_offset], 
+                ax.plot([x1, x2],
+                        [height + y_offset, height + y_offset],
                         lw=0.5, c='black', linestyle='-')
 
 
@@ -816,23 +817,23 @@ def add_significance(ax, data, col_name, significance_dict):
             # Calculate the middle position for the asterisk and the line break
             mid_point = (x1 + x2) / 2
             asterisk_width = 0.25 # # Determine the space to leave for the asterisk * (x2 - x1)  # 10% of the bar width
-            
+
             if asterisks != '':
                 # Draw the first line segment (left)
-                ax.plot([x1, x1, mid_point - asterisk_width], 
-                        [height + y_offset, height + y_offset * 1.05, height + y_offset * 1.05], 
+                ax.plot([x1, x1, mid_point - asterisk_width],
+                        [height + y_offset, height + y_offset * 1.05, height + y_offset * 1.05],
                         lw=0.5, c='black', linestyle='-')
                 # Draw the second line segment (right), set line width to 0.5
-                ax.plot([mid_point + asterisk_width, x2, x2], 
-                        [height + y_offset * 1.05, height + y_offset * 1.05, height + y_offset], 
+                ax.plot([mid_point + asterisk_width, x2, x2],
+                        [height + y_offset * 1.05, height + y_offset * 1.05, height + y_offset],
                         lw=0.5, c='black', linestyle='-')
                 # Add asterisks in the middle of the line break
-                ax.text(mid_point, height + y_offset * 1.05, asterisks, 
-                        ha='center', va='center', color='black', fontsize=12, fontweight='bold') 
-            
+                ax.text(mid_point, height + y_offset * 1.05, asterisks,
+                        ha='center', va='center', color='black', fontsize=12, fontweight='bold')
+
             # If asterisks are empty, plot a continuous line across
             else:
                 # Draw a continuous line without breaks
-                ax.plot([x1, x2], 
-                        [height + y_offset, height + y_offset], 
+                ax.plot([x1, x2],
+                        [height + y_offset, height + y_offset],
                         lw=0.5, c='black', linestyle='-')

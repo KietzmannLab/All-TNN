@@ -26,7 +26,7 @@ from all_tnn.analysis.util.statistic_funcs import plot_significance_matrix
 from all_tnn.analysis.util.setup_model_and_data import load_models, DatasetLabelRenamer
 from all_tnn.analysis.util.analysis_help_funcs import load_and_override_hparams, results_to_disk
 from all_tnn.analysis.util.convert_dict2h5 import convert_dict2h5
-from all_tnn.analysis.visualization.acc_maps_visualization import plot_bar_plot_from_df
+from all_tnn.analysis.visualization.plot_helper import plot_bar_plot_from_df
 
 from all_tnn.analysis.config import Config
 
@@ -157,7 +157,7 @@ def analysis_multi_models():
     if config.ANALYSIS_ON_NEURAL_LEVEL:
         for seed in config.SEEDS_RANGE:
             for epoch in checkpoints:
-                
+
                 # nested dictionary to store all neural-level analyses
                 multi_models_neural_dict = nested_dict()
                 all_l1_norm_data = []
@@ -200,7 +200,7 @@ def analysis_multi_models():
                             loss, acc, topk_acc = model.evaluate(new_dataset)
                         else:
                             loss, acc, topk_acc = model.evaluate(data_generators_dict['full_test'])
-                        
+
                         output_dict.update({
                             'ecoset_test_accuracy': acc,
                             'ecoset_test_loss': loss,
@@ -230,7 +230,7 @@ def analysis_multi_models():
                         try:
                             feature_responses = load_feature_responses(hparams)
                         except:
-                            feature_responses= get_feature_responses(activities_model, 
+                            feature_responses= get_feature_responses(activities_model,
                                                                     data_generators_dict,
                                                                     dataset_names= ['full_test'],  # ['vgg_faces_test', 'full_test']
                                                                     hparams=hparams,
@@ -267,7 +267,7 @@ def analysis_multi_models():
                         model.layers[1].layers if 'simclr' in model_name.lower() else model.layers,
                         epoch,
                         output_dict,
-                        hparams, 
+                        hparams,
                         get_spatial_loss=True,
                     )
                     output_dict['mean_cosdist'] = spatial_losses
@@ -276,7 +276,7 @@ def analysis_multi_models():
                     if config.SMOOTHNESS:
                         output = smoothness_main(
                             output_dict,
-                            epoch=epoch, 
+                            epoch=epoch,
                             analysis_path=hparams['analysis_dir']
                         )
                         output_dict.update(output)
@@ -340,7 +340,7 @@ def analysis_multi_models():
                                 model_names=MODELS[:],
                                 test_epochs=this_epoch[:],
                                 map_norm_mode=map_norm_mode,
-                                alphas=list(config.ALPHAS.values()), 
+                                alphas=list(config.ALPHAS.values()),
                                 seeds_list=config.SEEDS_RANGE,
                                 result_source_dir=config.BEHAVIOUR_RESULT_SOURCE_DIR,
                                 size_factor=size_factor,
@@ -393,7 +393,7 @@ def analysis_multi_models():
                             # Noise ceiling line
                             hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if config.PLOT_NC else None
 
-                            
+
                             plot_bar_plot_from_df(
                                 df_behaviour_agreements,
                                 add_epoch_to_save_dir_name(config.BEHAVIOUR_AGREEMENT_ANALYSIS_PATH, save_path_suffix),
@@ -406,7 +406,7 @@ def analysis_multi_models():
                                 figsize=(3.54, 2),
                                 y_breaks = [(0, 0.2),  (0.40,  0.44)],
 
-                                log_scale=False, significance_dict=None, 
+                                log_scale=False, significance_dict=None,
                                 show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
                                 # Hybrid
                                 show_boxplot=True, box_width=0.2, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
@@ -467,7 +467,7 @@ def analysis_multi_models():
                             # Noise ceiling line
                             hline = {'value': noise_ceiling, 'color': 'black', 'linestyle': 'dashed', 'linewidth': 1} if config.PLOT_NC else None
 
-                            # TODO try no boostrap? 
+                            # TODO try no boostrap?
                             # import pdb; pdb.set_trace()
                             plot_bar_plot_from_df(
                                 df_adm_agreement,
@@ -479,14 +479,14 @@ def analysis_multi_models():
                                 color3_start_id=1,
                                 hline=hline,
                                 figsize=(3.54, 2),
-                                y_breaks = [(0, 0.15),  (0.30,  0.34)], 
+                                y_breaks = [(0, 0.15),  (0.30,  0.34)],
 
-                                log_scale=False, significance_dict=None, 
+                                log_scale=False, significance_dict=None,
                                 show_barplot=True, bar_width=0.6, bar_alpha=0.4,error_bar_width=2,
                                 # Hybrid
                                 show_boxplot=True, box_width=0.2, box_linewidth=1, box_alpha=0.2, box_whis=(5, 95),
-                                point_plot=None, point_plot_kwargs={"size": 2, "alpha": 0.5}, 
-                                verbose=True, 
+                                point_plot=None, point_plot_kwargs={"size": 2, "alpha": 0.5},
+                                verbose=True,
                             )
 
 
