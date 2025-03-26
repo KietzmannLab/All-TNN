@@ -42,7 +42,9 @@ def generate_analysis_df(
           "ecoset Loss",
           "ecoset Topk Accuracy",
           "Spatial Smoothness",
-          "ecoset Categorical Loss" ]
+          "ecoset Categorical Loss",
+         "Category-selective cluster size",
+        "Orientation-selective cluster size"]
     """
 
     # Create the base directory if it doesn't exist
@@ -53,6 +55,8 @@ def generate_analysis_df(
     model_test_topk_accuracy = defaultdict(list)
     model_test_loss_dict = defaultdict(list)
     model_mean_cosdist_dict = defaultdict(list)
+    model_cluster_sizes_dict_cat = defaultdict(list)
+    model_cluster_sizes_dict_ori = defaultdict(list)
 
     # Loop over each model and seed to collect data
     for model_name in MODEL_NAMES:
@@ -72,6 +76,8 @@ def generate_analysis_df(
             model_test_loss_dict[model_name].append(model_results_dict[model_name]['ecoset_test_loss'])
             model_test_topk_accuracy[model_name].append(model_results_dict[model_name]['ecoset_test_topk_accuracy'])
             model_mean_cosdist_dict[model_name].append(np.sum(model_results_dict[model_name]['mean_cosdist']))
+            model_cluster_sizes_dict_cat[model_name].append(np.mean(model_results_dict[model_name]['smoothness_analysis']['cluster_size']['d_prime']))
+            model_cluster_sizes_dict_ori[model_name].append(np.mean(model_results_dict[model_name]['smoothness_analysis']['cluster_size']['os_sheet']))
 
     # Create a list of rows for the final DataFrame
     data = []
@@ -83,6 +89,8 @@ def generate_analysis_df(
                 model_test_loss_dict[model_name][i],             # "ecoset Loss"
                 model_test_topk_accuracy[model_name][i],         # "ecoset Topk Accuracy"
                 1 / model_mean_cosdist_dict[model_name][i],      # "Spatial Smoothness" = inverse of mean_cosdist
+                model_cluster_sizes_dict_cat[model_name][i],     # Cluster size Layer 6
+                model_cluster_sizes_dict_ori[model_name][i],     # Cluster size Layer 1
             ])
 
     # Build the DataFrame
@@ -94,6 +102,8 @@ def generate_analysis_df(
             "ecoset Loss",
             "ecoset Topk Accuracy",
             "Spatial Smoothness",
+            "Category-selective cluster size",
+            "Orientation-selective cluster size"
         ]
     )
 
