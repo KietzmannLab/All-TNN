@@ -35,6 +35,7 @@ def barplot(
     bar_width=0.6,
     bar_alpha=0.4,
     error_bar_width=2,
+    linewidth = 1,
     # ----------------
     show_boxplot=False,
     box_width=0.4,
@@ -110,7 +111,7 @@ def barplot(
                 data=data,
                 palette=cocclor_platte,
                 edgecolor='none',
-                linewidth=0,
+                linewidth=linewidth,
                 width=bar_width,
                 capsize=0,
                 dodge=bool(hue),
@@ -122,14 +123,16 @@ def barplot(
                 c = cocclor_platte[i % len(cocclor_platte)]
                 patch.set_facecolor(to_rgba(c, alpha=bar_alpha))
                 patch.set_edgecolor(c)
-                patch.set_linewidth(1.0)
+                patch.set_linewidth(linewidth)
 
             # Thicken & color-match the error-bar lines
             for i, line in enumerate(ax.lines):
+                if y_breaks and i < 1:
+                    continue
                 line.set_linewidth(error_bar_width)
                 # style as normal line
                 line.set_linestyle('-')
-                c = cocclor_platte[(i // 3) % len(cocclor_platte)]
+                c = cocclor_platte[(i // 3) % len(cocclor_platte)] if not y_breaks else cocclor_platte[( (i-1) // 3) % len(cocclor_platte)]
                 line.set_color(c)
             
             
