@@ -19,7 +19,7 @@ color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:]
 def barplot(
     save_path=None,
     title=None,
-    color3_start_id=0,
+    plot_color_start_id=0,
     figsize=(3.54, 2),
     x=None,
     y=None,
@@ -84,10 +84,10 @@ def barplot(
         plt.rcParams['font.family'] = 'sans-serif'
 
         # Fetch your color palette
-        if isinstance(color3_start_id, int):
-            color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[color3_start_id:]
-        elif isinstance(color3_start_id, list): # index into list with list of indices
-            color_palette = [COLOR_THEME_WITH_ALPHA_SWEEP[i] for i in color3_start_id]
+        if isinstance(plot_color_start_id, int):
+            color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[plot_color_start_id:]
+        elif isinstance(plot_color_start_id, list): # index into list with list of indices
+            color_palette = [COLOR_THEME_WITH_ALPHA_SWEEP[i] for i in plot_color_start_id]
         else:
             color_palette = color_palette
 
@@ -132,7 +132,7 @@ def barplot(
                 line.set_linewidth(error_bar_width)
                 # style as normal line
                 line.set_linestyle('-')
-                c = cocclor_platte[(i // 3) % len(cocclor_platte)] if not y_breaks else cocclor_platte[( (i-1) // 3) % len(cocclor_platte)]
+                c = color_palette[(i // 3) % len(color_palette)] if not y_breaks else color_palette[( (i-1) // 3) % len(color_palette)]
                 line.set_color(c)
 
 
@@ -261,7 +261,7 @@ def plot_bar_plot_from_df(df,
                         hue=None,
                         title="Models Comparison",
                         show_plot=True,
-                        color3_start_id=0,
+                        plot_color_start_id=0,
                         figsize=(3.54, 2),
                         verbose=False,
                         y_breaks=None,
@@ -274,7 +274,7 @@ def plot_bar_plot_from_df(df,
         ax = barplot(
             save_path=None,
             title=title,
-            color3_start_id=color3_start_id,
+            plot_color_start_id=plot_color_start_id,
             figsize=figsize,
             x=x,
             y=y,
@@ -297,7 +297,7 @@ def plot_bar_plot_from_df(df,
             plt.close()
 
 
-def plot_stacked_bar_plot(df_main, df_percentage, path, x="Model", y="Effect", hue="Group", title="Mean Accuracy Ratio Comparison", show_plot=True, color3_start_id=0, main_label = 'Spatial Prior', percentage_label="Common Prior"):
+def plot_stacked_bar_plot(df_main, df_percentage, path, x="Model", y="Effect", hue="Group", title="Mean Accuracy Ratio Comparison", show_plot=True, plot_color_start_id=0, main_label = 'Spatial Prior', percentage_label="Common Prior"):
 
     from .colors import COLOR_THEME
     plt.style.use([ 'nature','science',"ieee",'no-latex'])
@@ -309,7 +309,7 @@ def plot_stacked_bar_plot(df_main, df_percentage, path, x="Model", y="Effect", h
         # Combine the two dataframes
         combined_df = pd.concat([df_main, df_percentage])
 
-        barplot(color3_start_id=color3_start_id, title=title, x=x, y=y, hue=hue, data=combined_df, edgecolor="black", linewidth=.8, capsize=.02, errwidth=1.5)
+        barplot(plot_color_start_id=plot_color_start_id, title=title, x=x, y=y, hue=hue, data=combined_df, edgecolor="black", linewidth=.8, capsize=.02, errwidth=1.5)
         plt.title(title)
         plt.ylabel(y)
         plt.xlabel(x)

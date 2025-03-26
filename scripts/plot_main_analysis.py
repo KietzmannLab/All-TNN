@@ -81,7 +81,7 @@ plot_bar_plot_from_df(
     x="Model",
     y="Accuracy",
     title="Categorisation performance",
-    color3_start_id=1,
+    plot_color_start_id=1,
     show_plot=True,
     log_scale=False, hline=None, significance_dict=None,
     show_barplot=True,
@@ -96,7 +96,7 @@ plot_bar_plot_from_df(
     x="Model",
     y="Spatial Smoothness",
     title="Spatial smoothness",
-    color3_start_id=1,
+    plot_color_start_id=1,
     log_scale=True, hline=None, significance_dict=None,
     show_barplot=True,
     point_plot="strip", point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
@@ -113,7 +113,7 @@ visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_0',
 visualize_layer(model_results_dict_one_seed[model_name], 300, layer_i='layer_5', analysis_dir=plot_path_fig2, model_name=model_name, layer=None, save=True, show=False)
 
 # Radial entropy profile
-all_data = [read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5') for seed in config.SEEDS_RANGE]
+all_data = [read_h52dict(os.path.join(neural_level_h5_file_dir, f'seed{seed}/all_multi_models_neural_dict.h5')) for seed in config.SEEDS_RANGE]
 ent_dict = calculate_radial_entropy(all_data, config.MODEL_NAMES)
 plot_radial_entropy(ent_dict, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
 cluster_size_vs_eccentricity(all_data, color_palette, config.MODEL_NAMES, plot_path_fig2, save=True, show=True)
@@ -125,7 +125,7 @@ plot_bar_plot_from_df(
     x="Model",
     y="Orientation-selective cluster size",
     title="Average size of orientation-selective clusters in layer 1",
-    color3_start_id=1,
+    plot_color_start_id=1,
     log_scale=False, hline=None, significance_dict=None,
     show_barplot=True,
     point_plot="strip", point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
@@ -136,7 +136,7 @@ plot_bar_plot_from_df(
     x="Model",
     y="Category-selective cluster size",
     title="Average size of category-selective clusters in layer 6",
-    color3_start_id=1,
+    plot_color_start_id=1,
     log_scale=False, hline=None, significance_dict=None,
     show_barplot=True,
     point_plot="strip", point_plot_kwargs={"size": 2, "alpha": 0.5}, # "strip", "swarm", or None
@@ -186,31 +186,31 @@ plot_stacked_energy_maps_normalized(
     )
 
 
-# ############################################################################################################
-# #* Figure 4 Behavioural analysis
-# ############################################################################################################
-# print('Figure 4: Behavioural analysis')
-# # Human object-specific biases are predicted by animacy and real-world size.
-# # Non-negative least squares GLM analysis on the averaged human ADM shows significant unique variance explained by animacy and real-world size.
-# glm_results = run_full_GLM_analysis(
-#     base_path=behaviour_src_dir,
-#     data_filename='human_adm/adm_dict_pearsonr_spearmanr.h5',
-#     plot_path = plot_path_fig4,
-#     model_type='average_human_adm',
-#     predictor_names=['animate', 'size', 'spiky'],  # or a custom list of predictors (see make_predictors() function)
-#     num_permutations=1000,
-#     verbose=True,)
+############################################################################################################
+#* Figure 4 Behavioural analysis
+############################################################################################################
+print('Figure 4: Behavioural analysis')
+# Human object-specific biases are predicted by animacy and real-world size.
+# Non-negative least squares GLM analysis on the averaged human ADM shows significant unique variance explained by animacy and real-world size.
+glm_results = run_full_GLM_analysis(
+    base_path=behaviour_src_dir,
+    data_filename='human_adm/adm_dict_pearsonr_spearmanr.h5',
+    plot_path = plot_path_fig4,
+    model_type='average_human_adm',
+    predictor_names=['animate', 'size', 'spiky'],  # or a custom list of predictors (see make_predictors() function)
+    num_permutations=1000,
+    verbose=True,)
 
 # Spatial biases in human and model behaviour
-df_behavior_agreements = pd.read_csv(os.path.join(behaviour_src_dir, 'behaviour_analysis_results', 'df_behavior_agreement_main.csv'))
+df_behavior_agreements = pd.read_csv(os.path.join(behaviour_src_dir, 'behaviour_analysis_results', 'df_behavior_agreement.csv'))
 plot_bar_plot_from_df(
     df_behavior_agreements,
-    plot_path_fig4 + '/behaviour_agreements.pdf',
+    plot_path_fig4 + '/behaviour_agreement.pdf',
     x="Model",
     y='pearsonr',
     title="Behaviour Agreement Analysis",
     show_plot=False,
-    color3_start_id=1,
+    plot_color_start_id=1,
     y_breaks = [(0, 0.4), (0.80,  0.88)],
     log_scale=False, hline=None, significance_dict=None,
     show_barplot=True,
@@ -219,15 +219,15 @@ plot_bar_plot_from_df(
 )
 
 # Agreement with object-specific biases in human behaviour
-df_adm_agreement = pd.read_csv(os.path.join(behaviour_src_dir, 'behaviour_analysis_results', 'df_adm_agreement_main.csv'))
+df_adm_agreement = pd.read_csv(os.path.join(behaviour_src_dir, 'behaviour_analysis_results', 'df_adm_agreement.csv'))
 plot_bar_plot_from_df(
     df_adm_agreement,
-    plot_path_fig4 + '/adm_agreements.pdf',
+    plot_path_fig4 + '/adm_agreement.pdf',
     x="Model",
     y='spearmanr',
     title="ADM Agreement Analysis",
     show_plot=False,
-    color3_start_id=1,
+    plot_color_start_id=1,
     y_breaks = [(0, 0.25), (0.60,  0.68)],
     log_scale=False, hline=None, significance_dict=None,
     show_barplot=True,
