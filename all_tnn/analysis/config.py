@@ -157,9 +157,7 @@ class Config:
         self.MAP_NORM_MODES = ["max"]
         self.ALIGNMENT_MODES = ["mean"]
         self.BEHAVIOUR_ANALYSIS_MODES = "individual_model_vs_average_human"
-        self.SIZE_FACTORS = [
-            "relative_white_controlled_original_largest205_min20px_dataset_filtered_num500_grid_fixed_back255"
-        ]
+        self.SIZE_FACTORS = [ "default"]
 
         # Metrics for behavioural analysis
         self.COLUMNS = ["Model", "Correlation", "Condition"]
@@ -177,8 +175,8 @@ class Config:
             self.BEHAVIOUR_RESULT_SOURCE_DIR + "behaviour_analysis_results/"
         )
         self.BEHAVIOUR_AGREEMENT_ANALYSIS_PATH = (
-            self.BEHAVIOUR_ANALYSIS_RESULT_DIR + "/behaviour_agreements.pdf"
+            self.BEHAVIOUR_ANALYSIS_RESULT_DIR + "/df_behaviour_agreement.pdf"
         )
         self.ADM_AGREEMENT_ANALYSIS_PATH = (
-            self.BEHAVIOUR_ANALYSIS_RESULT_DIR + "/adm_agreements.pdf"
+            self.BEHAVIOUR_ANALYSIS_RESULT_DIR + "/df_adm_agreement.pdf"
         )

@@ -202,7 +202,7 @@ glm_results = run_full_GLM_analysis(
     verbose=True,)
 
 # Spatial biases in human and model behaviour
-df_behavior_agreements = pd.read_csv(os.path.join(behaviour_src_dir, 'behaviour_analysis_results', 'df_behavior_agreement.csv'))
+df_behavior_agreements = pd.read_csv(os.path.join(behaviour_src_dir, 'behaviour_analysis_results', 'df_behaviour_agreement.csv'))
 plot_bar_plot_from_df(
     df_behavior_agreements,
     plot_path_fig4 + '/behaviour_agreement.pdf',
@@ -215,7 +215,7 @@ plot_bar_plot_from_df(
     log_scale=False, hline=None, significance_dict=None,
     show_barplot=True,
     show_boxplot=True,
-    verbose=True,
+    verbose=False,
 )
 
 # Agreement with object-specific biases in human behaviour
@@ -228,11 +228,11 @@ plot_bar_plot_from_df(
     title="ADM Agreement Analysis",
     show_plot=False,
     plot_color_start_id=1,
-    y_breaks = [(0, 0.25), (0.60,  0.68)],
+    y_breaks = [(-0.15, 0.32),  (0.60,  0.68)],
     log_scale=False, hline=None, significance_dict=None,
     show_barplot=True,
     show_boxplot=True,
-    verbose=True,
+    verbose=False,
 )
 
 ############################################################################################################
