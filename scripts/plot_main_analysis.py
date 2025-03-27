@@ -35,12 +35,12 @@ color_palette = COLOR_THEME_WITH_ALPHA_SWEEP[1:]
 ############################################################################################################
 #* Setting up the directories for the analysis
 ############################################################################################################
-# Setting Paths to where the data is stored
-source_dir = '/share/klab/datasets/TNN_paper_save_dir/All-TNN_share/'
+# Setting Paths in 'analysis/config.py' or here to set where the data is stored
+config = Config()
+source_dir = config.ANALYSIS_DIR
 neural_level_src_dir = os.path.join(source_dir, 'neural_level_src')
 behaviour_src_dir = os.path.join(source_dir, 'behaviour_src')
 neural_level_h5_file_dir =  os.path.join(neural_level_src_dir, 'h5/')
-config = Config(base_path = '/share/klab/datasets/',   analysis_dir = source_dir)
 
 # List of additional directories to create
 directories = [
